@@ -1,6 +1,6 @@
 # Kikukawa Works
 
-アプリ・ツール・書籍を販売する個人サイト(https://kikukawa-works.com)。
+アプリ・ツール・書籍を販売する個人サイト(https://kikukawaworks.com)。
 
 React + Vite + Tailwind CSS v4 の静的サイトで、Cloudflare Pages で公開する。
 
