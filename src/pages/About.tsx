@@ -12,7 +12,10 @@ export function About() {
           {SELLER.brand} は、{SELLER.name} が個人で運営しているお店です。
           AI(Claude Code)を相棒にして、自分の趣味や暮らしの中で「こういうものが欲しい」と思ったアプリやツール、書籍を形にしています。
         </p>
-        <p>作品へのご意見や不具合のご報告は、いつでも歓迎しています。</p>
+        <p>
+          作った作品はこのサイトで公開しています。使ってみて気づいたことや、あったらうれしい機能、不具合などは、
+          お気軽にメールでお知らせください。いただいた声は、次の改善に活かします。
+        </p>
         <p>
           連絡先:{' '}
           <a href={`mailto:${SELLER.email}`} className="text-accent hover:underline">
