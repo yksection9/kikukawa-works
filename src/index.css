@@ -1,0 +1,20 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-paper: #f7f3ec;
+  --color-card: #fffdf9;
+  --color-ink: #1f1a14;
+  --color-sub: #6b6258;
+  --color-line: #e4dccf;
+  --color-accent: #b4691f;
+  --color-accent-deep: #8a4d12;
+  --font-sans: 'Noto Sans JP', system-ui, sans-serif;
+  --font-serif: 'Shippori Mincho', Georgia, serif;
+}
+
+html {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
