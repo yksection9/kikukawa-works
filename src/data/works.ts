@@ -48,7 +48,7 @@ export const WORKS: Work[] = [
       { src: '/works/whisky/bar-mid.webp', alt: '棚が埋まりはじめたバーの部屋' },
       { src: '/works/whisky/bar-empty.webp', alt: 'まだ何もないバーの部屋' },
     ],
-    url: 'https://whisky-app-pi.vercel.app',
+    url: 'https://whisky.kikukawaworks.com',
   },
 ]
 
