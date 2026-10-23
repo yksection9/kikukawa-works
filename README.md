@@ -23,3 +23,15 @@ React + Vite + Tailwind CSS v4 の静的サイトで、Cloudflare Pages で公�
 - ビルドコマンド: `npm run build`
 - 出力ディレクトリ: `dist`
 - SPAのルーティングは `public/_redirects` で `index.html` に戻している
+
+## 他のプロジェクトの作品を載せるとき
+
+アプリ・ツール・書籍などの売れる状態の作品は、すべてこのサイトに載せる(オーナーの方針、2026-10-23)。
+
+1. このリポジトリ(`yksection9/kikukawa-works`)を取得する
+2. `public/works/<slug>/` に画像を置き、`src/data/works.ts` の `WORKS` に1件足す(型は同ファイル冒頭)
+3. サイトで直接売るなら、Stripeで支払いリンクを作って `buyUrl` に入れる(外部の販売ページがあるなら `url` にそのURLを入れる)
+4. `npm run build` が通るのを確認して main に push する。Cloudflare Pages が自動で公開する
+5. 特商法表記(`src/pages/Legal.tsx`)とプライバシーポリシー(`src/pages/Privacy.tsx`)が、その作品の販売方法に合っているか見る
+
+公開・価格・Stripeの作成のように外に出る作業は、オーナーの確認を取る。
