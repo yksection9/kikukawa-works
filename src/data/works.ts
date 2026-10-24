@@ -45,11 +45,7 @@ export const WORKS: Work[] = [
     ],
     price: '無料',
     priceNote: '有料版(ボトル登録数が無制限)はアプリ内で980円・買い切り',
-    images: [
-      { src: '/works/whisky/bar-full.webp', alt: 'ボトルが並んだバーの部屋' },
-      { src: '/works/whisky/bar-mid.webp', alt: '棚が埋まりはじめたバーの部屋' },
-      { src: '/works/whisky/bar-empty.webp', alt: 'まだ何もないバーの部屋' },
-    ],
+    images: [{ src: '/works/whisky/cover.webp', alt: 'バーカウンターに並んだウイスキーのボトルとテイスティンググラス' }],
     url: 'https://whisky.kikukawaworks.com',
     color: '#8e5414',
   },

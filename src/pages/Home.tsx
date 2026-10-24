@@ -11,13 +11,12 @@ export function Home() {
     <>
       <section className="mx-auto grid max-w-6xl items-center gap-12 px-4 pt-10 pb-16 sm:px-8 md:grid-cols-[5fr_6fr] md:gap-16 md:pt-16 md:pb-24">
         <div className="rise">
-          <h1 className="text-[36px] leading-[1.35] font-black sm:text-[49px]">
-            欲しいものを、
-            <br />
-            自分の手でつくる。
+          <h1 className="text-[33px] leading-[1.4] font-black sm:text-[44px]">
+            <span className="block whitespace-nowrap">誰かの役に立つ</span>
+            <span className="block whitespace-nowrap">ものを、ひとつずつ。</span>
           </h1>
           <p className="mt-6 max-w-[34em] text-[16px] text-sub">
-            菊川雄士が個人でつくっているアプリ、ツール、書籍のお店です。自分で使いたくて作ったものを、同じように欲しい人へ届けます。
+            菊川雄士が個人でつくっているアプリ、ツール、書籍のお店です。使う人の手間がひとつ減ること、はじめての人でも迷わず使えることを大事にしています。
           </p>
           <div className="mt-10">
             <Link to="/works" className="btn btn-line">作品を見る</Link>
@@ -29,7 +28,7 @@ export function Home() {
             <img
               src={featured.images[0].src}
               alt={featured.images[0].alt}
-              className="aspect-[4/5] w-full object-cover sm:aspect-[5/4]"
+              className="aspect-[4/5] w-full object-cover"
             />
           </Link>
           <figcaption className="mt-6 ml-auto w-fit text-right text-[14px] leading-relaxed">
