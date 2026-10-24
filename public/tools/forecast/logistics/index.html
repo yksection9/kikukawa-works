@@ -202,6 +202,23 @@ input[type=range] { width: 100%; height: 32px; accent-color: var(--accent); }
 .score .sub, .score .pill { font-size: 14px; color: var(--muted); }
 .pill.good { color: var(--good); } .pill.warn { color: var(--warn); } .pill.bad { color: var(--bad); }
 footer { font-size: 14px; color: var(--muted); }
+/* 普段は見ない入力欄をしまう箱。閉じていても、今の数字は見出しに出す */
+details.fold { border: 1px solid var(--line); border-radius: 12px; }
+details.fold > summary { list-style: none; cursor: pointer; padding: 12px 14px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; align-items: center; min-height: 52px; }
+details.fold > summary::-webkit-details-marker { display: none; }
+details.fold > summary::after { content: "変える ▼"; grid-column: 2; grid-row: 1 / span 2; font-size: 15px; color: var(--accent); font-weight: 500; white-space: nowrap; }
+details.fold[open] > summary::after { content: "閉じる ▲"; }
+details.fold > summary .t { font-weight: 700; }
+details.fold > summary .now2 { font-size: 15px; color: var(--muted); line-height: 1.5; overflow-wrap: anywhere; }
+details.fold > .in { display: grid; gap: 14px; padding: 4px 14px 16px; }
+@media print {
+  body { background: #fff; color: #000; font-size: 12pt; }
+  .wrap { max-width: none; padding: 0; gap: 10px; }
+  .noprint, .toplinks, .badge, details.card, details.fold, button, .filebtn, .safe, .ranges, canvas, .legend, #s1card, #checkCard, #exportCard { display: none !important; }
+  .card { border: 1px solid #999; break-inside: avoid; padding: 12px; }
+  .hero { background: none; border: 1px solid #999; }
+  .table-wrap { overflow: visible; }
+}
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
@@ -219,7 +236,7 @@ footer { font-size: 14px; color: var(--muted); }
   </header>
 
   <!-- ① データ -->
-  <section class="card" aria-labelledby="s1">
+  <section class="card" id="s1card" aria-labelledby="s1">
     <h2 class="step" id="s1"><b>1</b>データを選ぶ</h2>
     <p class="say">まずは見本で試せます。慣れたら、倉庫の記録(CSVファイル)を入れてください。</p>
     <div class="choices two">
@@ -233,11 +250,16 @@ footer { font-size: 14px; color: var(--muted); }
     <p class="safe"><span aria-hidden="true">🔒</span><span>ファイルはこのパソコン(スマホ)の中だけで計算します。インターネットには送りません。</span></p>
     <p class="err" id="fileErr" hidden></p>
     <div class="field" id="fileCheck" hidden></div>
-    <div class="field">
-      <label for="targetSel">予想したい数はどれですか</label>
-      <select id="targetSel"></select>
-    </div>
-    <div class="field" id="colRoles"></div>
+    <details class="fold" id="colFold">
+      <summary><span class="t">使う列</span><span class="now2" id="colFoldSum"></span></summary>
+      <div class="in">
+        <div class="field">
+          <label for="targetSel">予想したい数はどれですか</label>
+          <select id="targetSel"></select>
+        </div>
+        <div class="field" id="colRoles"></div>
+      </div>
+    </details>
     <p class="notice warn" id="susNote" hidden></p>
   </section>
 
@@ -262,6 +284,9 @@ footer { font-size: 14px; color: var(--muted); }
         <option value="none">人数は出さない</option>
       </select>
     </div>
+    <details class="fold" id="staffFold">
+      <summary><span class="t">計算に使っている数字</span><span class="now2" id="staffFoldSum"></span></summary>
+      <div class="in">
     <div class="inputs" data-ind="restaurant" id="staffShop">
       <div class="field"><label for="shopCap">スタッフ1人が1日に対応できるお客さんの数</label><span class="num-in"><input type="number" id="shopCap" min="1" value="25">人</span></div>
       <div class="field"><label for="shopMin">どんなに暇でも必要な最低人数</label><span class="num-in"><input type="number" id="shopMin" min="0" value="2">人</span></div>
@@ -292,6 +317,9 @@ footer { font-size: 14px; color: var(--muted); }
       <div class="field"><label for="outRate">1人1時間あたりの平均架電数</label><span class="num-in"><input type="number" id="outRate" min="0.1" step="0.1" value="14">件</span></div>
       <div class="field"><span class="lbl">平均架電数が分からないときは、1件にかかる時間から計算</span><span class="num-in">前処理<input type="number" id="outPre" min="0" value="30" aria-label="前処理の秒数">秒 通話<input type="number" id="outTalk" min="0" value="150" aria-label="通話の秒数">秒 後処理<input type="number" id="outPost" min="0" value="60" aria-label="後処理の秒数">秒</span><button type="button" id="outCalc" style="justify-self:start">この秒数で平均架電数を出す</button></div>
     </div>
+        <p class="small saveNote">入れた数字は、このブラウザの中に自動で保存されます(外には送りません)。次に開いたときも、そのまま使えます。</p>
+      </div>
+    </details>
     <div id="staffSum" class="field"></div>
     <p class="notice warn" id="staffErr" hidden></p>
     <div class="table-wrap"><table class="stbl" id="staffTbl"></table></div>
@@ -300,8 +328,11 @@ footer { font-size: 14px; color: var(--muted); }
 
   <!-- 食品ロス(飲食だけ) -->
   <section class="card" data-ind="restaurant" aria-labelledby="sLoss">
-    <h2 class="step" id="sLoss" style="font-size:19px">食品ロスの目安(仕込み量)</h2>
+    <h2 class="step" id="sLoss"><b>4</b>食品ロスの目安(仕込み量)</h2>
     <p class="say">飲食店の食品ロスの大きな原因の一つは、来客数の読み違いによる仕込みすぎです。予想した来客数から仕込み量の目安を出します。さらに、「この予想で仕込んでいたら、どれだけ余って、どれだけ足りなかったか」を、いつものやり方と比べます。</p>
+    <details class="fold" id="lossFold">
+      <summary><span class="t">メニューと上乗せ</span><span class="now2" id="lossFoldSum"></span></summary>
+      <div class="in">
     <div class="field">
       <span class="lbl">主なメニュー(お客さん100人のうち何人が頼むか・1食の原価)</span>
       <div class="menus" id="menus">
@@ -312,14 +343,28 @@ footer { font-size: 14px; color: var(--muted); }
       <p class="small">割合と原価は、POSのメニュー別の売上を1か月分見て入れてください。</p>
     </div>
     <div class="field"><label for="lossMargin">品切れしないための上乗せ</label><span class="num-in"><input type="number" id="lossMargin" min="0" max="100" value="10">%</span></div>
+        <p class="small saveNote">入れた数字は、このブラウザの中に自動で保存されます(外には送りません)。</p>
+      </div>
+    </details>
     <div id="lossSum" class="field"></div>
     <div class="table-wrap"><table class="stbl" id="prepTbl"></table></div>
     <p class="small" id="lossNote"></p>
   </section>
 
+  <!-- 持ち出し -->
+  <section class="card" id="exportCard" aria-labelledby="sEx">
+    <h2 class="step" id="sEx"><b>5</b>結果を保存・印刷する</h2>
+    <p class="say">シフト表や発注に写すときに使えます。CSVはExcelでそのまま開けます。</p>
+    <div class="btnrow">
+      <button type="button" class="primary" id="csvBtn">CSVで保存<span>予想と人数の表(Excelで開けます)</span></button>
+      <button type="button" id="printBtn">印刷する<span>予想と人数の表だけを紙1〜2枚に</span></button>
+    </div>
+    <p class="notice" id="exportNote" hidden></p>
+  </section>
+
   <!-- ④ 当たり具合 -->
-  <section class="card" aria-labelledby="s3">
-    <h2 class="step" id="s3"><b>4</b>この予想、信じていい?</h2>
+  <section class="card" id="checkCard" aria-labelledby="s3">
+    <h2 class="step" id="s3"><b>6</b>この予想、信じていい?</h2>
     <p class="say" id="checkLead"></p>
     <div class="compare">
       <div class="cmp ours"><div class="top"><span class="name">このツールの外れ方</span><span class="pct" id="oursPct">–</span></div><div class="track"><i id="oursBar"></i></div></div>
@@ -352,24 +397,21 @@ footer { font-size: 14px; color: var(--muted); }
     </div>
   </section>
 
-  <!-- 効いている情報 -->
-  <section class="card" aria-labelledby="s4">
-    <h2 class="step" id="s4" style="font-size:19px">予想の決め手になっている情報</h2>
-    <p class="small">棒が長いほど、予想に強く効いています。</p>
-    <div class="bars" id="bars"></div>
-  </section>
-
   <!-- 詳しい設定 -->
   <details class="card">
     <summary>詳しい設定(慣れてきた方向け)</summary>
     <div class="adv">
-      <p class="small">さわらなくても使えます。変えるとすぐに「4」の成績が計算し直されます。迷ったら一番下の「最初の設定に戻す」を押してください。</p>
+      <p class="small">さわらなくても使えます。変えるとすぐに「この予想、信じていい?」の成績が計算し直されます。迷ったら一番下の「最初の設定に戻す」を押してください。</p>
 
       <h3>成績のくわしい数字</h3>
       <div class="scores">
         <div class="score" style="--c:var(--tune)"><span>練習期間の外れ方</span><span class="big" id="tuneBig">–</span><span class="pill" id="tunePill"></span><span class="sub" id="tuneSub"></span></div>
         <div class="score" style="--c:var(--check)"><span>本番期間の外れ方</span><span class="big" id="checkBig">–</span><span class="pill" id="checkPill"></span><span class="sub" id="checkSub"></span></div>
       </div>
+
+      <h3>予想の決め手になっている情報</h3>
+      <p class="small">棒が長いほど、予想に強く効いています。</p>
+      <div class="bars" id="bars"></div>
 
       <h3>期間</h3>
       <div class="prow"><span class="name"><span class="sw" style="background:var(--tune)"></span>練習期間</span><input type="date" id="tuneFrom" aria-label="練習期間の始まり"><span>〜</span><input type="date" id="tuneTo" aria-label="練習期間の終わり"></div>
@@ -413,6 +455,8 @@ footer { font-size: 14px; color: var(--muted); }
       <div><button type="button" id="leakBtn">未来の記録を見ていないか検査する</button></div>
       <p class="notice" id="leakNote" hidden></p>
       <div><button type="button" id="defaultBtn">最初の設定に戻す</button></div>
+      <div><button type="button" id="forgetBtn">保存した数字(人数・メニューなど)を消す</button></div>
+      <p class="notice" id="forgetNote" hidden></p>
       <footer id="foot">外れ方 = 予想と実際の差の合計 ÷ 実際の数の合計。「いつものやり方」は先週の同じ曜日の数をそのまま使う方法です。</footer>
     </div>
   </details>
@@ -425,12 +469,43 @@ footer { font-size: 14px; color: var(--muted); }
 (function (root) {
   "use strict";
 
-  const JP_HOLIDAYS = new Set([
-    "2023-01-01", "2023-01-02", "2023-01-09", "2023-02-11", "2023-02-23", "2023-03-21", "2023-04-29", "2023-05-03", "2023-05-04", "2023-05-05", "2023-07-17", "2023-08-11", "2023-09-18", "2023-09-23", "2023-10-09", "2023-11-03", "2023-11-23",
-    "2024-01-01", "2024-01-08", "2024-02-11", "2024-02-12", "2024-02-23", "2024-03-20", "2024-04-29", "2024-05-03", "2024-05-04", "2024-05-05", "2024-05-06", "2024-07-15", "2024-08-11", "2024-08-12", "2024-09-16", "2024-09-22", "2024-09-23", "2024-10-14", "2024-11-03", "2024-11-04", "2024-11-23",
-    "2025-01-01", "2025-01-13", "2025-02-11", "2025-02-23", "2025-02-24", "2025-03-20", "2025-04-29", "2025-05-03", "2025-05-04", "2025-05-05", "2025-05-06", "2025-07-21", "2025-08-11", "2025-09-15", "2025-09-23", "2025-10-13", "2025-11-03", "2025-11-23", "2025-11-24",
-    "2026-01-01", "2026-01-12", "2026-02-11", "2026-02-23", "2026-03-20", "2026-04-29", "2026-05-03", "2026-05-04", "2026-05-05", "2026-05-06", "2026-07-20", "2026-08-11", "2026-09-21", "2026-09-22", "2026-09-23", "2026-10-12", "2026-11-03", "2026-11-23",
-  ]);
+  // 日本の祝日は法律の決まりから計算する(毎年の手直しが要らない)。春分・秋分は1980〜2099年に使える近似式。
+  // 振替休日(日曜の祝日の次の平日)と国民の休日(祝日に挟まれた日)も含む。年ごとに一度だけ計算して覚えておく。
+  const holidayCache = new Map();
+  function holidaysOf(y) {
+    if (holidayCache.has(y)) return holidayCache.get(y);
+    const out = new Set(), key = (m, d) => iso(Date.UTC(y, m - 1, d));
+    const nthMon = (m, n) => { const w = new Date(Date.UTC(y, m - 1, 1)).getUTCDay(); return 1 + ((8 - w) % 7) + 7 * (n - 1); };
+    const add = (m, d) => out.add(key(m, d));
+    const k = y - 1980;
+    add(1, 1); add(1, nthMon(1, 2)); add(2, 11);
+    if (y >= 2020) add(2, 23); else if (y >= 1989 && y <= 2018) add(12, 23);
+    add(3, Math.floor(20.8431 + 0.242194 * k - Math.floor(k / 4)));
+    add(4, 29); add(5, 3); add(5, 4); add(5, 5);
+    if (y === 2020) { add(7, 23); add(7, 24); add(8, 10); }
+    else if (y === 2021) { add(7, 22); add(7, 23); add(8, 8); }
+    else { add(7, nthMon(7, 3)); if (y >= 2016) add(8, 11); add(10, nthMon(10, 2)); }
+    add(9, nthMon(9, 3));
+    add(9, Math.floor(23.2488 + 0.242194 * k - Math.floor(k / 4)));
+    add(11, 3); add(11, 23);
+    if (y === 2019) { add(5, 1); add(10, 22); }
+    const base = [...out].sort();
+    // 国民の休日: 前の日と次の日が祝日の、祝日でない日(日曜は除く)
+    for (const ds of base) {
+      const t = Date.parse(ds) + 2 * DAY;
+      if (out.has(iso(t)) && !out.has(iso(t - DAY)) && new Date(t - DAY).getUTCDay() !== 0) out.add(iso(t - DAY));
+    }
+    // 振替休日: 日曜の祝日のあと、最初の祝日でない日
+    for (const ds of [...out].sort()) {
+      let t = Date.parse(ds);
+      if (new Date(t).getUTCDay() !== 0) continue;
+      do t += DAY; while (out.has(iso(t)));
+      if (new Date(t).getUTCFullYear() === y) out.add(iso(t));
+    }
+    holidayCache.set(y, out);
+    return out;
+  }
+  const JP_HOLIDAYS = { has: (ds) => holidaysOf(+ds.slice(0, 4)).has(ds) };
 
   const DAY = 86400000;
   const iso = (t) => new Date(t).toISOString().slice(0, 10);
@@ -891,6 +966,8 @@ footer { font-size: 14px; color: var(--muted); }
   const E = window.ForecastEngine;
   const INDUSTRY = "logistics";
   document.querySelectorAll("[data-ind]").forEach((el) => { if (el.dataset.ind !== INDUSTRY) el.remove(); });
+  // 業種によってカードの数が違うので、番号は残ったカードに上から振り直す
+  document.querySelectorAll(".step b").forEach((b, i) => { b.textContent = i + 1; });
   const $ = (id) => document.getElementById(id);
   const LAGS = [1, 2, 3, 7, 14, 28];
   const TRAIN = [0, 730, 365, 180, 90];
@@ -910,6 +987,7 @@ footer { font-size: 14px; color: var(--muted); }
     st.roles = {};
     for (const c of info.numeric) if (c !== st.target) st.roles[c] = (presetRoles && presetRoles[c]) || "off";
     $("dataName").textContent = name;
+    $("colFold").open = !!isFile; // 自分のファイルのときは、列の使い方を確かめてもらうので開いておく
     setDefaultPeriods();
     renderColumns();
     fillStaffCols(); $("staffMode").value = guessMode();
@@ -941,7 +1019,13 @@ footer { font-size: 14px; color: var(--muted); }
         <option value="known" ${st.roles[c] === "known" ? "selected" : ""}>前もって分かる(セール・キャンペーン・入荷予定など)</option>
         <option value="past" ${st.roles[c] === "past" ? "selected" : ""}>終わってから分かる(返品数・残業時間など)</option>
       </select></div>`).join("") : "";
-    box.querySelectorAll("select").forEach((s) => s.addEventListener("change", () => { st.roles[s.dataset.col] = s.value; st.defaultRes = null; schedule(); }));
+    box.querySelectorAll("select").forEach((s) => s.addEventListener("change", () => { st.roles[s.dataset.col] = s.value; st.defaultRes = null; colSummary(); schedule(); }));
+    colSummary();
+  }
+  function colSummary() {
+    const pick = (r) => Object.keys(st.roles).filter((c) => st.roles[c] === r);
+    const k = pick("known"), p = pick("past");
+    $("colFoldSum").textContent = `予想する数: ${st.target}` + (k.length ? ` ・ 前もって分かる: ${k.join("・")}` : "") + (p.length ? ` ・ 終わってから分かる: ${p.join("・")}` : "");
   }
   const isFlag = (c) => st.S.data[c].every((v) => isNaN(v) || v === 0 || v === 1);
   // 自分のファイルを入れたとき: 中身の先頭を見せ、何の数か分かりにくい列やデータの穴を知らせる
@@ -1095,7 +1179,7 @@ footer { font-size: 14px; color: var(--muted); }
     const d = document.createElement("div"); d.className = "step-row";
     d.innerHTML = `<input type="text" value="${esc(name)}" aria-label="工程の名前"><select aria-label="出荷側か入荷側か"><option value="out" ${side === "out" ? "selected" : ""}>出荷側</option><option value="in" ${side === "in" ? "selected" : ""}>入荷側</option></select><span class="num-in"><input type="number" min="0.1" step="0.1" value="${rate}" aria-label="1人1時間あたりの処理件数">件/時</span><button type="button">消す</button>`;
     d.querySelectorAll("input, select").forEach((el) => el.addEventListener("input", renderStaff));
-    d.querySelector("button").addEventListener("click", () => { d.remove(); renderStaff(); });
+    d.querySelector("button").addEventListener("click", () => { d.remove(); renderStaff(); saveSettings(); });
     return d;
   }
   function readSteps() {
@@ -1106,9 +1190,19 @@ footer { font-size: 14px; color: var(--muted); }
   }
   if ($("whSteps")) {
     for (const s of WH_DEFAULT) $("whSteps").appendChild(stepRow(...s));
-    $("whAdd").addEventListener("click", () => { const r = stepRow("新しい工程", "out", 50); $("whSteps").appendChild(r); r.querySelector("input").select(); renderStaff(); });
+    $("whAdd").addEventListener("click", () => { const r = stepRow("新しい工程", "out", 50); $("whSteps").appendChild(r); r.querySelector("input").select(); renderStaff(); saveSettings(); });
   }
   function renderStaff() {
+    renderStaffTable();
+    const mode = $("staffMode").value, v = (id) => $(id)?.value;
+    $("staffFold").hidden = mode === "none";
+    $("staffFoldSum").textContent = mode === "shop" ? `1人で1日${v("shopCap")}人まで ・ 最低${v("shopMin")}人`
+      : mode === "in" ? `1件${v("inAht")}秒 ・ 受付${v("inHours")}時間 ・ ${v("inSlSec")}秒以内に${v("inSlPct")}% ・ 出られない割合${v("inShrink")}%`
+      : mode === "wh" ? readSteps().map((s) => `${s.name}${s.rate}件/時`).join(" ・ ") + ` ・ 1人${v("whHours")}時間`
+      : mode === "out" ? `目標${Number(v("outGoal")).toLocaleString()}${v("outGoalType") === "hours" ? "時間" : "件"} ・ 欠勤率${v("outAbsent")}% ・ 1人${v("outHours")}時間 ・ 1時間に${v("outRate")}件` : "";
+    if (!$("staffErr").hidden) $("staffFold").open = true; // 直す場所が見えるように
+  }
+  function renderStaffTable() {
     const mode = $("staffMode").value, tbl = $("staffTbl"), note = $("staffNote"), err = $("staffErr");
     for (const [k, id] of [["shop", "staffShop"], ["in", "staffIn"], ["out", "staffOut"], ["wh", "staffWh"]]) if ($(id)) $(id).hidden = mode !== k;
     err.hidden = true; tbl.innerHTML = ""; note.textContent = ""; $("staffSum").innerHTML = "";
@@ -1196,6 +1290,7 @@ footer { font-size: 14px; color: var(--muted); }
   function renderLoss() {
     if (!$("lossSum")) return;
     const menus = [...document.querySelectorAll("#menus .menu-row")].map((r) => { const [n, p, c] = r.querySelectorAll("input"); return { name: n.value.trim() || "メニュー", rate: (parseFloat(p.value) || 0) / 100, cost: parseFloat(c.value) || 0 }; }).filter((m) => m.rate > 0);
+    $("lossFoldSum").textContent = menus.map((m) => `${m.name}${Math.round(m.rate * 100)}%`).join(" ・ ") + ` ・ 上乗せ${num("lossMargin") || 0}%`;
     const mg = (num("lossMargin") || 0) / 100, R = menus.reduce((s, m) => s + m.rate, 0), CPC = menus.reduce((s, m) => s + m.rate * m.cost, 0);
     if (!menus.length) { $("lossSum").innerHTML = `<p class="notice warn">メニューの割合を1つ以上入れてください。</p>`; $("prepTbl").innerHTML = ""; return; }
     const y = st.S.data[st.target], p = st.res.wf.pred, P = periods();
@@ -1369,13 +1464,95 @@ footer { font-size: 14px; color: var(--muted); }
   document.querySelectorAll("[data-sample]").forEach((b) => b.addEventListener("click", () => { $("fileIn").value = ""; start(b.dataset.sample); }));
   if ($("outCalc")) $("outCalc").addEventListener("click", () => {
     const s = (num("outPre") || 0) + (num("outTalk") || 0) + (num("outPost") || 0);
-    if (s > 0) { $("outRate").value = (3600 / s).toFixed(1); renderStaff(); }
+    if (s > 0) { $("outRate").value = (3600 / s).toFixed(1); renderStaff(); saveSettings(); }
   });
   document.querySelectorAll("#menus input, #lossMargin").forEach((el) => el.addEventListener("input", renderLoss));
   for (const id of ["whInCol", "outGoalType", "outAbsent", "outHoursCol", "whRate", "whHours", "whShrink", "outRate", "outHours", "outShrink", "shopCap", "shopMin", "inAht", "inHours", "inSlSec", "inSlPct", "inShrink", "outGoal", "outStaff"]) $(id)?.addEventListener("input", () => { renderStaff(); renderAhead(); });
   let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(drawChart, 100); });
   const mq = window.matchMedia("(prefers-color-scheme: dark)"); mq.addEventListener?.("change", drawChart);
   new MutationObserver(drawChart).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+  // ---- 設定の保存(人数の計算・メニューの数字。このブラウザの中だけに置き、外には送らない)
+  const SAVE_KEY = "forecast-tool-v1-" + INDUSTRY;
+  const SAVE_IDS = ["shopCap", "shopMin", "inAht", "inHours", "inSlSec", "inSlPct", "inShrink", "whHours", "whShrink", "outGoalType", "outGoal", "outAbsent", "outHours", "outRate", "outPre", "outTalk", "outPost", "lossMargin"];
+  function collectSettings() {
+    const v = {};
+    for (const id of SAVE_IDS) if ($(id)) v[id] = $(id).value;
+    if ($("whSteps")) v.steps = [...document.querySelectorAll("#whSteps .step-row")].map((r) => [r.querySelector("input[type=text]").value, r.querySelector("select").value, r.querySelector("input[type=number]").value]);
+    if ($("menus")) v.menus = [...document.querySelectorAll("#menus .menu-row")].map((r) => [...r.querySelectorAll("input")].map((i) => i.value));
+    return v;
+  }
+  function applySettings(v) {
+    for (const id of SAVE_IDS) if ($(id) && v[id] != null) $(id).value = v[id];
+    if ($("whSteps") && Array.isArray(v.steps) && v.steps.length) { $("whSteps").innerHTML = ""; for (const s of v.steps) $("whSteps").appendChild(stepRow(...s)); }
+    if ($("menus") && Array.isArray(v.menus)) document.querySelectorAll("#menus .menu-row").forEach((r, i) => r.querySelectorAll("input").forEach((inp, j) => { if (v.menus[i]?.[j] != null) inp.value = v.menus[i][j]; }));
+  }
+  function saveSettings() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(collectSettings())); } catch (e) { /* 保存できないブラウザでも、そのまま使える */ } }
+  const FIRST = collectSettings();
+  try { const v = JSON.parse(localStorage.getItem(SAVE_KEY) || "null"); if (v) applySettings(v); } catch (e) { /* 保存がなければ最初の数字 */ }
+  for (const ev of ["input", "change"]) document.addEventListener(ev, (e) => { if (e.target.closest?.("#staffFold, #lossFold")) saveSettings(); });
+  $("forgetBtn").addEventListener("click", () => {
+    try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* なにもしない */ }
+    applySettings(FIRST); renderStaff(); renderLoss(); renderAhead();
+    $("forgetNote").hidden = false; $("forgetNote").textContent = "保存した数字を消して、最初の数字に戻しました。";
+  });
+
+  // ---- 結果の持ち出し(CSV・印刷)
+  // claude.ai の中で開いたときは、保存の確認を出すしくみ(downloads)を使う。ほかの場所ではふつうのダウンロード
+  const dlP = window.claude?.use ? window.claude.use("downloads").catch(() => null) : Promise.resolve(null);
+  async function saveFile(name, text, type) {
+    const blob = new Blob([text], { type });
+    const dl = await dlP;
+    if (dl) {
+      try { await dl.save({ filename: name, data: blob }); return "ok"; } catch (e) { return e?.code === "declined" ? "declined" : "fail"; }
+    }
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    return "ok";
+  }
+  // 画面の表(人数・仕込み量)を日付でつないで1つの表にする。「12人」のような単位は見出しに移し、数字だけにする(Excelで足し算できるように)
+  function exportTable() {
+    const y = st.S.data[st.target]; let last = y.length - 1; while (last > 0 && isNaN(y[last])) last--;
+    const byKey = new Map();
+    for (const t of [...st.S.days.slice(last + 1), ...st.ahead.map((a) => a.t)]) byKey.set(fmtMD(t), t);
+    const head = ["日付", "曜日", `予想${st.target}`], rows = new Map();
+    const rowOf = (t) => { if (!rows.has(t)) rows.set(t, { 日付: E.iso(t), 曜日: WD[new Date(t).getUTCDay()] }); return rows.get(t); };
+    for (const a of st.ahead) rowOf(a.t)[head[2]] = isClosed(a) ? "休み" : String(Math.max(0, Math.round(a.value)));
+    for (const tbl of [$("staffTbl"), $("prepTbl")]) {
+      if (!tbl || !tbl.rows.length) continue;
+      const hs = [...tbl.querySelectorAll("thead th")].map((th) => th.textContent.trim());
+      const body = [...tbl.querySelectorAll("tbody tr")].map((tr) => [...tr.cells].flatMap((td) => Array(td.colSpan || 1).fill(td.textContent.trim())));
+      hs.forEach((h, j) => {
+        if (j === 0 || head.includes(h)) return;
+        const unitM = body.map((r) => /^[\d,.]+(人|件|食|時間)$/.exec(r[j] || "")).find(Boolean), name = unitM ? `${h}(${unitM[1]})` : h;
+        if (head.includes(name)) return;
+        head.push(name);
+        for (const r of body) { const t = byKey.get(r[0]); if (t == null) continue; const m = /^([\d,.]+)(人|件|食|時間)$/.exec(r[j] || ""); rowOf(t)[name] = m ? m[1].replace(/,/g, "") : r[j]; }
+      });
+    }
+    return { head, rows: [...rows.entries()].sort((a, b) => a[0] - b[0]).map(([, r]) => head.map((h) => r[h] ?? "")) };
+  }
+  const csvCell = (v) => (/[",\n]/.test(v) ? `"${String(v).replace(/"/g, '""')}"` : v);
+  function exportMsg(r, okText) {
+    const n = $("exportNote");
+    n.hidden = false;
+    n.className = "notice " + (r === "ok" ? "good" : r === "declined" ? "" : "warn");
+    n.textContent = r === "ok" ? okText : r === "declined" ? "保存をやめました。" : "このページでは保存できませんでした。表を選んでコピーし、Excelに貼り付けてください。";
+  }
+  $("csvBtn").addEventListener("click", async () => {
+    const T = exportTable();
+    if (!T.rows.length) return exportMsg("fail");
+    const text = "\ufeff" + [T.head, ...T.rows].map((r) => r.map(csvCell).join(",")).join("\r\n") + "\r\n";
+    exportMsg(await saveFile(`物流予測ツール_${T.rows[0][0]}から.csv`, text, "text/csv"), `${T.rows.length}日分(${T.rows[0][0]}〜${T.rows[T.rows.length - 1][0]})をCSVにしました。`);
+  });
+  $("printBtn").addEventListener("click", async () => {
+    const dl = await dlP;
+    if (!dl) { window.print(); return; }
+    // claude.ai の中では印刷の画面を開けないので、印刷用のページを保存してもらい、それを開くと印刷の画面が出るようにする
+    const T = exportTable();
+    const html = `<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>物流予測ツール 印刷用</title><style>body{font-family:"Hiragino Sans","Yu Gothic","Meiryo",sans-serif;margin:24px;color:#000}h1{font-size:20px;margin:0 0 4px}p{margin:4px 0 12px;font-size:14px}table{border-collapse:collapse;font-size:13px}th,td{border:1px solid #888;padding:4px 8px;text-align:right}th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}th{background:#eee}</style></head><body><h1>物流予測ツール</h1><p>${esc($("dataName").textContent)} ・ ${E.iso(Date.now())}に出力</p>${$("staffSum").innerText ? `<p>${esc($("staffSum").innerText).replace(/\n+/g, "<br>")}</p>` : ""}<table><thead><tr>${T.head.map((h) => `<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>${T.rows.map((r) => `<tr>${r.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table><script>window.onload=function(){window.print()}<\/script></body></html>`;
+    exportMsg(await saveFile(`物流予測ツール_印刷用.html`, html, "text/html"), "印刷用のページを保存しました。保存したファイルを開くと、印刷の画面が出ます。");
+  });
 
   function start(kind) {
     st.ui = { ...DEFAULT, lags: [...DEFAULT.lags] }; syncUI();
