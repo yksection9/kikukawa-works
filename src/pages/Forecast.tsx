@@ -4,7 +4,7 @@ import { SELLER } from '../data/seller'
 import { usePageTitle } from '../usePageTitle'
 import { NotFound } from './NotFound'
 
-// 予測ツール(ベータ版)の紹介ページ。中身は1つで、業種ごとに言葉と見本だけを変える。
+// 予測ツール(ベータ版)の紹介ページ。中身は1つで、業種ごとに言葉とテストデータだけを変える。
 // 見た目は道具の画面(public/tools/forecast/)と同じ色と字にそろえる。設計メモは 汎用予測ツール/design/2026-10-24_LPデザインメモ.md
 type Industry = 'restaurant' | 'callcenter' | 'logistics'
 const INDUSTRIES: Industry[] = ['restaurant', 'callcenter', 'logistics']
@@ -12,7 +12,8 @@ const INDUSTRIES: Industry[] = ['restaurant', 'callcenter', 'logistics']
 // デモは業種ごとに別の画面(public/tools/forecast/<業種>/)
 const DEMO_URL = (ind: Industry): string => `/tools/forecast/${ind}/`
 
-// 冒頭の予想表。数字は見本画面(2026-10-24 版)に出る値をそのまま写したもの
+// 冒頭の予想表。数字はテスト画面(2026-10-25 最終検収版)に出る値をそのまま写したもの。null は休み
+// 気象庁データの組み込み後に数字が変わるので、公開前に写し直す
 const DAYS = [
   { d: '1/1', w: '祝' },
   { d: '1/2', w: '金' },
@@ -24,11 +25,11 @@ const DAYS = [
 ]
 
 type Sheet = {
-  rows: { label: string; unit: string; values: number[]; strong?: boolean }[]
+  rows: { label: string; unit: string; values: (number | null)[]; strong?: boolean }[]
   foot: string
 }
 
-// 見本データでの外れ方(本番期間)。model=このツール、base=先週の同じ曜日の数をそのまま使う
+// テストデータでの外れ方(本番期間)。model=このツール、base=先週の同じ曜日の数をそのまま使う
 type Score = { label: string; model: number; base: number; note?: string }
 
 type Copy = {
@@ -54,22 +55,22 @@ const COPY: Record<Industry, Copy> = {
       '予約が多い日と少ない日で、読みが大きく外れる',
     ],
     features: [
-      { title: '来客数の予想', body: 'この先1週間、日ごとの来客数を出します。予約数・雨の予報・祝日も考えに入れます。' },
+      { title: '来客数の予想', body: 'この先1週間、日ごとの来客数を出します。曜日・祝日のほか、前日までの予約数や雨の予報を列として入れると、それも考えに入れます。' },
       { title: '仕込み量の目安', body: '主なメニューごとに「お客さん100人のうち何人が頼むか」と原価を入れると、日ごとの仕込み量の目安を出します。品切れしないための上乗せも決められます。' },
       { title: '食品ロスの比べ', body: '「もしこの予想で仕込んでいたら、どれだけ余って、どれだけ足りなかったか」を、いつものやり方と比べて食数と原価で出します。' },
       { title: '必要なスタッフの人数', body: 'スタッフ1人が1日に対応できるお客さんの数と、暇な日でも必要な最低人数から、日ごとの人数を出します。' },
     ],
     sheet: {
       rows: [
-        { label: '予想来客数', unit: '人', values: [99, 93, 118, 92, 58, 44, 68], strong: true },
-        { label: '必要なスタッフ', unit: '人', values: [4, 4, 5, 4, 3, 2, 3] },
-        { label: '日替わり定食の仕込み', unit: '食', values: [39, 36, 46, 36, 23, 17, 27] },
+        { label: '予想来客数', unit: '人', values: [69, 101, 132, 111, 54, 66, 79], strong: true },
+        { label: '必要なスタッフ', unit: '人', values: [3, 5, 6, 5, 3, 3, 4] },
+        { label: '日替わり定食の仕込み', unit: '食', values: [27, 39, 51, 43, 21, 26, 31] },
       ],
       foot: 'スタッフ1人あたり25人・最低2人、日替わり定食は100人中35人が頼み、上乗せ10%で計算',
     },
-    scores: [{ label: '来客数', model: 7, base: 16 }],
-    extra: '食品ロスの比べでは、余る食事が1年で約1,300食、原価にして約39万円減る計算でした。品切れも925食から216食に減っています(メニュー3品・仮の割合と原価で計算)。',
-    sampleNote: '見本の来客数データ(作り物)で、2025年4月〜12月を予想した結果',
+    scores: [{ label: '来客数', model: 8, base: 17 }],
+    extra: '食品ロスの比べでは、余る食事が1年で約1,280食、原価にして約38万円減る計算でした。品切れも910食から243食に減っています(メニュー3品・仮の割合と原価で計算)。',
+    sampleNote: 'テスト用の来客数データ(作り物)で、2025年4月〜12月を予想した結果',
   },
   callcenter: {
     label: 'コールセンター',
@@ -81,23 +82,24 @@ const COPY: Record<Industry, Copy> = {
       '入電数の予想をExcelで毎月作るのに時間がかかる',
     ],
     features: [
-      { title: '入電数の予想', body: 'この先1週間の入電数を出します。キャンペーン中・CMの放送日・DMの発送日などを列として入れると、それも考えに入れます。' },
+      { title: '入電数の予想', body: 'この先1週間の入電数を出します。キャンペーン中・CMの放送日・DMの発送日などを列として入れると、それも考えに入れます。DMは発送日を入れるだけで、届くころの増え方を見ます。' },
       { title: '電話を受ける必要人数', body: '平均対応時間・受付時間・「何秒以内に何%の電話に出るか」の目標から、コールセンターで広く使われる計算(アーランC)で日ごとのシフト人数を出します。' },
       { title: '架電の月の着地見込み', body: 'ここまでの実績と、残りの営業日の出勤予定(欠勤率を差し引き)から、今月の着地見込みを出します。目標が架電件数でも稼働時間でも使えます。' },
       { title: 'あと何人で届くか', body: '足りないときは「残りの営業日に1日あと何人増やせば届くか」を出します。1時間あたりの平均架電数からの見込みとも並べて見られます。' },
+      { title: '受けもかけも同じ人のとき', body: '入電と架電を同じオペレーターが兼ねるセンター向けに、両方の件数から必要な人数の目安を出します。' },
     ],
     sheet: {
       rows: [
-        { label: '予想入電数', unit: '件', values: [81, 445, 105, 69, 750, 633, 588], strong: true },
-        { label: '必要なシフト人数', unit: '人', values: [3, 10, 5, 3, 15, 13, 13] },
+        { label: '予想入電数', unit: '件', values: [218, 574, 134, 94, 821, 700, 642], strong: true },
+        { label: '必要なシフト人数', unit: '人', values: [6, 12, 5, 5, 16, 15, 13] },
       ],
-      foot: '架電の見本では、1月14日の時点で今月の着地見込みが目標20,000件の95%。残りの営業日に1日あと約2人増やせば届く計算です。',
+      foot: '架電のテストデータでは、1月14日の時点で今月の着地見込みが目標20,000件の95%。残りの営業日に1日あと約1人増やせば届く計算です。',
     },
     scores: [
-      { label: '入電数', model: 12, base: 29 },
-      { label: '架電数', model: 5, base: 33, note: '出勤予定の人数を列として入れた場合' },
+      { label: '入電数', model: 11, base: 29 },
+      { label: '架電数', model: 4, base: 28, note: '出勤予定の人数を列として入れた場合' },
     ],
-    sampleNote: '見本の入電数・架電数データ(作り物)で、2025年4月〜12月ごろを予想した結果',
+    sampleNote: 'テスト用の入電数・架電数データ(作り物)で、2025年4月〜12月ごろを予想した結果',
   },
   logistics: {
     label: '物流・倉庫',
@@ -116,14 +118,14 @@ const COPY: Record<Industry, Copy> = {
     ],
     sheet: {
       rows: [
-        { label: '予想出荷件数', unit: '件', values: [868, 1661, 1135, 637, 2320, 1681, 1523], strong: true },
-        { label: '予想入荷件数', unit: '件', values: [377, 964, 219, 0, 1232, 1155, 1085] },
-        { label: '必要な作業人数', unit: '人', values: [7, 14, 9, 5, 18, 14, 12] },
+        { label: '予想出荷件数', unit: '件', values: [null, null, null, null, 7231, 1267, 1249], strong: true },
+        { label: '予想入荷件数', unit: '件', values: [null, null, null, null, 1162, 1163, 1083] },
+        { label: '必要な作業人数', unit: '人', values: [null, null, null, null, 43, 12, 12] },
       ],
-      foot: '作業人数は、ピッキング・梱包・出荷・入荷の工程ごとに出した人数の合計です。',
+      foot: '年末年始の休みのあと、注文がたまった休み明けの山も読みます。作業人数は、ピッキング・梱包・出荷・入荷の工程ごとに出した人数の合計です。',
     },
-    scores: [{ label: '出荷件数', model: 7, base: 13 }],
-    sampleNote: '見本の出荷件数データ(作り物)で、2025年4月〜12月を予想した結果',
+    scores: [{ label: '出荷件数', model: 5, base: 25 }],
+    sampleNote: 'テスト用の出荷件数データ(作り物)で、2025年4月〜12月を予想した結果',
   },
 }
 
@@ -150,10 +152,10 @@ function ForecastSheet({ sheet, score }: { sheet: Sheet; score: Score }) {
     <figure className="min-w-0 rounded-xl border border-fc-line bg-white shadow-[0_16px_32px_-20px_rgba(29,36,34,0.35)]">
       <figcaption className="flex items-baseline justify-between gap-3 border-b border-fc-line px-4 py-3">
         <span className="font-bold">来週の予想</span>
-        <span className="text-xs text-fc-sub">見本データ</span>
+        <span className="text-xs text-fc-sub">テストデータ</span>
       </figcaption>
       <table className="w-full table-fixed border-collapse text-center tabular-nums">
-        <caption className="sr-only">この先1週間の予想(見本データ)</caption>
+        <caption className="sr-only">この先1週間の予想(テストデータ)</caption>
         <thead>
           <tr className="text-xs text-fc-sub">
             <th scope="col" className="w-0 p-0"><span className="sr-only">項目</span></th>
@@ -166,7 +168,7 @@ function ForecastSheet({ sheet, score }: { sheet: Sheet; score: Score }) {
           </tr>
         </thead>
         {sheet.rows.map((r, i) => {
-          const wide = Math.max(...r.values) >= 1000
+          const wide = Math.max(...r.values.map((v) => v ?? 0)) >= 1000
           return (
           <tbody key={r.label} className="fc-row" style={{ animationDelay: `${150 + i * 120}ms` }}>
             <tr>
@@ -178,7 +180,7 @@ function ForecastSheet({ sheet, score }: { sheet: Sheet; score: Score }) {
               <td className="w-0 p-0" />
               {r.values.map((v, j) => (
                 <td key={j} className={`px-0.5 pt-0.5 pb-3 ${r.strong ? `${wide ? 'text-[15px]' : 'text-[17px]'} font-bold text-fc-accent sm:text-xl` : `${wide ? 'text-sm' : 'text-[15px]'} sm:text-base`}`}>
-                  {fmt(v)}
+                  {v === null ? <span className="text-xs font-normal text-fc-sub">休み</span> : fmt(v)}
                 </td>
               ))}
             </tr>
@@ -271,7 +273,7 @@ export function Forecast() {
             <h1 className="mt-4 text-[34px] leading-[1.3] font-black text-balance [word-break:auto-phrase] sm:text-[42px]">{c ? c.title : ALL.title}</h1>
             <p className="mt-5 max-w-[38em] text-[17px] leading-[1.85] text-fc-sub">{c ? c.lead : ALL.lead}</p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <a href={DEMO_URL(c ? (key as Industry) : 'restaurant')} className={primary}>見本データで試す</a>
+              <a href={DEMO_URL(c ? (key as Industry) : 'restaurant')} className={primary}>テストデータで試す</a>
               <a href="#apply" className={secondary}>無料で予測してもらう</a>
             </div>
           </div>
@@ -302,11 +304,11 @@ export function Forecast() {
               </dl>
             </Section>
 
-            <Section title="見本データでの当たり具合">
+            <Section title="テストデータでの当たり具合">
               <ScoreBars scores={c.scores} />
               {c.extra && <p className="mt-6 max-w-[38em] leading-[1.85]">{c.extra}</p>}
               <p className="mt-4 max-w-[38em] text-sm leading-relaxed text-fc-sub">
-                外れ方は、予想と実際の差の合計を、実際の数の合計で割ったものです。{c.sampleNote}で、実際のお店・センター・倉庫の成績ではありません。お手元の記録でどうなるかは、見本の画面に入れて確かめられます。
+                外れ方は、予想と実際の差の合計を、実際の数の合計で割ったものです。{c.sampleNote}で、実際のお店・センター・倉庫の成績ではありません。お手元の記録でどうなるかは、テスト画面に入れて確かめられます。
               </p>
             </Section>
           </>
@@ -320,7 +322,7 @@ export function Forecast() {
                     <p className="mt-1 text-fc-sub">{ALL.pick[ind]}</p>
                   </div>
                   <a href={DEMO_URL(ind)} className="shrink-0 font-bold text-fc-accent underline-offset-4 hover:underline">
-                    {COPY[ind].label}の見本で試す
+                    {COPY[ind].label}のテストデータで試す
                   </a>
                 </li>
               ))}
@@ -342,15 +344,15 @@ export function Forecast() {
         <Section title="Excelの予測シートとの違い">
           <div className="max-w-[38em] space-y-3 leading-[1.85]">
             <p>Excelの予測シートは、普段の日にはそこそこ当たります。外れやすいのは、祝日・雨・キャンペーンのような「いつもと違う日」です。</p>
-            <p>このツールは、そうした日の情報を列として入れて予想に使えます。見本の飲食データでは、祝日の外れ方がExcelと同じ方式で22%、このツールで12%でした。</p>
+            <p>このツールは、そうした日の情報を列として入れて予想に使えます。別に用意した飲食のテストデータでは、祝日の外れ方がExcelと同じ方式で22%、このツールで12%でした。</p>
           </div>
         </Section>
 
         <Section title="使い方">
           <ol className="max-w-[38em] space-y-4">
             {[
-              '日付と数が並んだ記録のファイル(CSV)を用意します。POSや電話・倉庫のシステムから出せる形で大丈夫です。',
-              '見本の画面にファイルを入れると、この先1週間の予想と必要な人数が出ます。',
+              '日付と数が並んだ記録のファイル(CSV)を用意します。POSや電話・倉庫のシステムから出せる形で大丈夫です。Excelで保存したCSVも、そのまま読めます。',
+              'テスト画面にファイルを入れると(ドラッグでも入ります)、この先1週間の予想と必要な人数が出ます。',
               '「この予想、信じていい?」で、いつものやり方と外れ方を比べてから使います。',
             ].map((s, i) => (
               <li key={s} className="flex gap-4">
