@@ -39,7 +39,7 @@ export function Layout() {
           </div>
         </div>
         <p className="mx-auto max-w-6xl px-4 pb-8 text-[13px] text-[#9a9fa6] sm:px-8">
-          © {new Date().getFullYear()} {SELLER.name}
+          © {new Date().getFullYear()} {SELLER.brand}
         </p>
       </footer>
     </div>

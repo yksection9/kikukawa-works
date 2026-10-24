@@ -16,7 +16,7 @@ export function Home() {
             <span className="block whitespace-nowrap">ものを、ひとつずつ。</span>
           </h1>
           <p className="mt-6 max-w-[34em] text-[16px] text-sub">
-            菊川雄士が個人でつくっているアプリ、ツール、書籍のお店です。使う人の手間がひとつ減ること、はじめての人でも迷わず使えることを大事にしています。
+            私が個人でつくっているアプリ、ツール、書籍のお店です。使う人の手間がひとつ減ること、はじめての人でも迷わず使えることを大事にしています。
           </p>
           <div className="mt-10">
             <Link to="/works" className="btn btn-line">作品を見る</Link>
