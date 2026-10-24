@@ -37,6 +37,10 @@ export function Privacy() {
         </Section>
         <Section title="各作品の取り扱い">
           <p>アプリなど作品ごとに扱う情報は、それぞれの作品内のプライバシーポリシーをご確認ください。</p>
+          <p>
+            予測ツール(/tools/forecast/)に入れたCSVは、お使いのブラウザの中だけで計算します。
+            CSVの中身が当サイトや他のサーバーに送られることはなく、保存もしません。
+          </p>
         </Section>
         <Section title="お問い合わせ">
           <p>

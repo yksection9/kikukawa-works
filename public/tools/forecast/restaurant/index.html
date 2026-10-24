@@ -1,0 +1,1570 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="毎日の来客数のCSVを入れるだけで、この先1週間の来客数と必要なスタッフの人数を予想する無料ツール(ベータ版)。データはブラウザの外に送信しません。">
+<link rel="icon" href="/favicon.svg">
+<title>来客予測ツール</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* かんたん表示: 上から順に ①データ → ②予測 → ③当たり具合 → 詳しい設定(たたんである)。文字とボタンは大きく、言葉は日常語に */
+:root {
+  --bg: #f6f4ef;
+  --panel: #ffffff;
+  --ink: #1d2422;
+  --muted: #55615c;
+  --line: #d8dcd6;
+  --accent: #0b6b5f;
+  --accent-soft: #e3f1ee;
+  --actual: #2a3330;
+  --tune: #d68a1c;
+  --tune-bg: rgba(214,138,28,.12);
+  --check: #3b6fd1;
+  --check-bg: rgba(59,111,209,.10);
+  --good: #1d7a45;
+  --good-soft: #e5f4ea;
+  --warn: #9a5410;
+  --warn-soft: #fbefdf;
+  --bad: #b3261e;
+  --bad-soft: #fbe6e4;
+  --sat: #2f5fb8;
+  --sun: #c0392b;
+  --chip: #eceee9;
+  --font-body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", "Meiryo", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121614; --panel: #1a201e; --ink: #edf2ef; --muted: #a3afaa; --line: #2e3834;
+    --accent: #45c6b2; --accent-soft: #17312c; --actual: #dbe4e0; --tune: #f0b45a; --tune-bg: rgba(240,180,90,.14);
+    --check: #7aa2ee; --check-bg: rgba(122,162,238,.13); --good: #5fd08e; --good-soft: #15291d; --warn: #eaa45d; --warn-soft: #2e2214;
+    --bad: #f07a6b; --bad-soft: #321a17; --sat: #86a9f0; --sun: #f08a7d; --chip: #252e2b;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121614; --panel: #1a201e; --ink: #edf2ef; --muted: #a3afaa; --line: #2e3834;
+  --accent: #45c6b2; --accent-soft: #17312c; --actual: #dbe4e0; --tune: #f0b45a; --tune-bg: rgba(240,180,90,.14);
+  --check: #7aa2ee; --check-bg: rgba(122,162,238,.13); --good: #5fd08e; --good-soft: #15291d; --warn: #eaa45d; --warn-soft: #2e2214;
+  --bad: #f07a6b; --bad-soft: #321a17; --sat: #86a9f0; --sun: #f08a7d; --chip: #252e2b;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 17px; line-height: 1.75; }
+.wrap { max-width: 860px; margin: 0 auto; padding-block: 20px 60px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 20px; }
+header { display: grid; gap: 4px; }
+.topline { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+h1 { font-size: 28px; margin: 0; font-weight: 700; letter-spacing: .02em; }
+.badge { font-size: 14px; padding: 2px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+.toplinks { display: flex; flex-wrap: wrap; gap: 16px; margin-left: auto; font-size: 15px; }
+.toplinks a { color: var(--accent); }
+.lead { margin: 0; color: var(--muted); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 22px; display: grid; gap: 16px; min-width: 0; }
+.step { display: flex; align-items: center; gap: 12px; margin: 0; font-size: 22px; font-weight: 700; }
+.step b { display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: var(--panel); font-size: 19px; flex-shrink: 0; }
+.say { margin: 0; }
+.small { font-size: 15px; color: var(--muted); margin: 0; }
+button, .filebtn { font: inherit; font-size: 17px; min-height: 52px; padding: 10px 20px; border-radius: 12px; border: 2px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; font-weight: 500; text-align: center; }
+button:hover, .filebtn:hover { border-color: var(--accent); }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--panel); font-weight: 700; }
+button:focus-visible, input:focus-visible, select:focus-visible, .filebtn:focus-within, summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+button:disabled { opacity: .55; cursor: wait; }
+.choices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 640px) { .choices { grid-template-columns: minmax(0, 1fr); } }
+.choices button[aria-pressed=true] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+.choices .ico { display: block; font-size: 26px; line-height: 1.2; }
+.choices.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 640px) { .choices.two { grid-template-columns: minmax(0, 1fr); } }
+.inputs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; }
+@media (max-width: 640px) { .inputs { grid-template-columns: minmax(0, 1fr); } }
+.inputs .field { align-content: start; }
+.num-in { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+input[type=number] { font: inherit; font-size: 18px; width: 110px; min-height: 48px; padding: 6px 10px; border: 2px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); }
+.stbl { width: 100%; border-collapse: collapse; font-size: 16px; }
+.stbl th, .stbl td { padding: 10px 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.stbl th:first-child, .stbl td:first-child { text-align: left; }
+.stbl th { font-size: 14px; color: var(--muted); font-weight: 500; white-space: normal; }
+.stbl td.key { font-size: 22px; font-weight: 700; color: var(--accent); }
+@media (max-width: 520px) { .stbl { font-size: 14px; } .stbl th, .stbl td { padding: 8px 4px; } .stbl td.key { font-size: 18px; } }
+.stbl .ok { color: var(--good); font-weight: 700; } .stbl .ng { color: var(--bad); font-weight: 700; } .stbl .off { color: var(--muted); }
+.table-wrap { overflow-x: auto; }
+.menus { display: grid; gap: 8px; }
+.checklist { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
+.checklist li.warn { color: var(--warn); }
+.peek { font-size: 14px; border-collapse: collapse; }
+.peek th, .peek td { padding: 4px 8px; border: 1px solid var(--line); white-space: nowrap; text-align: left; }
+.peek th { background: var(--chip); font-weight: 700; }
+.menu-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; align-items: center; }
+@media (max-width: 520px) { .menu-row { grid-template-columns: minmax(0, 1fr) auto; } .menu-row input[type=text] { grid-column: 1 / -1; } }
+.menu-row input[type=text] { font: inherit; font-size: 17px; min-height: 48px; padding: 6px 10px; border: 2px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); min-width: 0; }
+.menu-row input[type=number] { width: 90px; }
+.step-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 8px; align-items: center; padding: 10px; border: 1px solid var(--line); border-radius: 12px; }
+@media (max-width: 640px) { .step-row { grid-template-columns: minmax(0, 1fr) auto; } .step-row input[type=text] { grid-column: 1 / -1; } }
+.step-row input[type=text] { font: inherit; font-size: 17px; min-height: 48px; padding: 6px 10px; border: 2px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); min-width: 0; }
+.step-row input[type=number] { width: 90px; }
+.step-row button { min-height: 44px; padding: 6px 12px; font-size: 15px; }
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 640px) { .pair { grid-template-columns: minmax(0, 1fr); } }
+.box { border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 4px; }
+.box.ours { border: 2px solid var(--accent); }
+.box .big2 { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+#outPre, #outTalk, #outPost { width: 80px; }
+.filebtn { display: grid; place-items: center; border-style: dashed; }
+.filebtn input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.now { margin: 0; padding: 10px 14px; border-radius: 10px; background: var(--chip); font-weight: 500; }
+.safe { display: flex; gap: 8px; align-items: flex-start; margin: 0; font-size: 15px; color: var(--good); }
+.err { margin: 0; padding: 12px 14px; border-radius: 10px; background: var(--bad-soft); color: var(--bad); font-weight: 500; }
+.field { display: grid; gap: 6px; }
+.field > label, .field > .lbl { font-weight: 700; }
+select, input[type=date] { font: inherit; font-size: 17px; min-height: 48px; padding: 6px 10px; border: 2px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); min-width: 0; max-width: 100%; }
+.colrow { display: grid; gap: 4px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; }
+.colrow label { font-weight: 700; }
+.notice { margin: 0; padding: 12px 14px; border-radius: 10px; background: var(--chip); }
+.notice.warn { background: var(--warn-soft); color: var(--warn); }
+.notice.good { background: var(--good-soft); color: var(--good); }
+.notice.bad { background: var(--bad-soft); color: var(--bad); }
+
+/* 予測 */
+.hero { display: grid; gap: 2px; padding: 20px; border-radius: 14px; background: var(--accent-soft); text-align: center; }
+.hero .when { font-size: 20px; font-weight: 700; }
+.hero .num { font-size: 64px; font-weight: 700; line-height: 1.1; color: var(--accent); font-variant-numeric: tabular-nums; }
+.hero .num small { font-size: 26px; margin-left: 4px; }
+.days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 640px) { .days { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.day { border: 1px solid var(--line); border-radius: 12px; padding: 10px 4px; text-align: center; display: grid; gap: 2px; }
+.day .d { font-size: 15px; color: var(--muted); }
+.day .w { font-size: 16px; font-weight: 700; }
+.day .w.sat { color: var(--sat); } .day .w.sun { color: var(--sun); }
+.day .v { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.day .miss { font-size: 12px; color: var(--warn); line-height: 1.3; }
+
+/* 当たり具合 */
+.compare { display: grid; gap: 14px; }
+.cmp { display: grid; gap: 6px; }
+.cmp .top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.cmp .name { font-weight: 700; }
+.cmp .pct { font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.cmp.ours .pct { color: var(--accent); }
+.track { height: 18px; border-radius: 9px; background: var(--chip); overflow: hidden; }
+.track i { display: block; height: 100%; border-radius: 9px; background: var(--muted); }
+.cmp.ours .track i { background: var(--accent); }
+.verdict { margin: 0; padding: 16px; border-radius: 12px; font-size: 19px; font-weight: 700; }
+.verdict.good { background: var(--good-soft); color: var(--good); }
+.verdict.warn { background: var(--warn-soft); color: var(--warn); }
+.verdict.bad { background: var(--bad-soft); color: var(--bad); }
+.btnrow { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 640px) { .btnrow { grid-template-columns: minmax(0, 1fr); } }
+.btnrow button { display: grid; gap: 2px; }
+.btnrow button span { font-size: 14px; font-weight: 400; opacity: .9; }
+
+canvas { width: 100%; height: 280px; display: block; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 15px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { display: inline-block; width: 22px; height: 4px; border-radius: 2px; }
+.legend i.box { height: 12px; width: 16px; }
+.ranges { display: flex; flex-wrap: wrap; gap: 8px; }
+.ranges button { min-height: 42px; padding: 6px 14px; font-size: 15px; }
+.ranges button[aria-pressed=true] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+
+.bars { display: grid; gap: 8px; }
+.bar { display: grid; grid-template-columns: minmax(0, 210px) minmax(0, 1fr); gap: 10px; align-items: center; font-size: 15px; }
+@media (max-width: 520px) { .bar { grid-template-columns: minmax(0, 1fr); gap: 2px; } }
+.bar div { height: 12px; background: var(--accent); border-radius: 6px; opacity: .8; }
+.bar span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* 詳しい設定 */
+details.card { padding: 0; }
+details.card > summary { list-style: none; cursor: pointer; padding: 20px 22px; font-size: 19px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+details.card > summary::-webkit-details-marker { display: none; }
+details.card > summary::after { content: "開く ▼"; font-size: 15px; color: var(--accent); font-weight: 500; white-space: nowrap; }
+details.card[open] > summary::after { content: "閉じる ▲"; }
+.adv { display: grid; gap: 18px; padding: 0 22px 22px; }
+.adv h3 { margin: 6px 0 0; font-size: 17px; padding-top: 14px; border-top: 1px solid var(--line); }
+.slider { display: grid; gap: 4px; }
+.slider label { display: flex; justify-content: space-between; gap: 10px; font-weight: 500; }
+.val { color: var(--accent); font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+input[type=range] { width: 100%; height: 32px; accent-color: var(--accent); }
+.checks { display: flex; flex-wrap: wrap; gap: 8px; }
+.check { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 6px 14px; border: 2px solid var(--line); border-radius: 999px; cursor: pointer; user-select: none; }
+.check input { width: 20px; height: 20px; accent-color: var(--accent); margin: 0; }
+.prow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.prow .name { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; min-width: 110px; }
+.sw { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
+.scores { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 520px) { .scores { grid-template-columns: minmax(0, 1fr); } }
+.score { border: 1px solid var(--line); border-top: 4px solid var(--c); border-radius: 10px; padding: 12px; display: grid; gap: 2px; }
+.score .big { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.score .sub, .score .pill { font-size: 14px; color: var(--muted); }
+.pill.good { color: var(--good); } .pill.warn { color: var(--warn); } .pill.bad { color: var(--bad); }
+footer { font-size: 14px; color: var(--muted); }
+/* 普段は見ない入力欄をしまう箱。閉じていても、今の数字は見出しに出す */
+details.fold { border: 1px solid var(--line); border-radius: 12px; }
+details.fold > summary { list-style: none; cursor: pointer; padding: 12px 14px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; align-items: center; min-height: 52px; }
+details.fold > summary::-webkit-details-marker { display: none; }
+details.fold > summary::after { content: "変える ▼"; grid-column: 2; grid-row: 1 / span 2; font-size: 15px; color: var(--accent); font-weight: 500; white-space: nowrap; }
+details.fold[open] > summary::after { content: "閉じる ▲"; }
+details.fold > summary .t { font-weight: 700; }
+details.fold > summary .now2 { font-size: 15px; color: var(--muted); line-height: 1.5; overflow-wrap: anywhere; }
+details.fold > .in { display: grid; gap: 14px; padding: 4px 14px 16px; }
+@media print {
+  body { background: #fff; color: #000; font-size: 12pt; }
+  .wrap { max-width: none; padding: 0; gap: 10px; }
+  .noprint, .toplinks, .badge, details.card, details.fold, button, .filebtn, .safe, .ranges, canvas, .legend, #s1card, #checkCard, #exportCard { display: none !important; }
+  .card { border: 1px solid #999; break-inside: avoid; padding: 12px; }
+  .hero { background: none; border: 1px solid #999; }
+  .table-wrap { overflow: visible; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header>
+    <div class="topline">
+      <h1>来客予測ツール</h1>
+      <span class="badge">ベータ版・無料</span>
+      <nav class="toplinks"><a href="/forecast/restaurant">説明を読む</a><a href="/forecast/restaurant#apply">無料で予測してもらう</a></nav>
+    </div>
+    <p class="lead">毎日の来客数から、この先1週間の来客数と、必要なスタッフの人数を予想します。上から順に見ていくだけで使えます。</p>
+  </header>
+
+  <!-- ① データ -->
+  <section class="card" id="s1card" aria-labelledby="s1">
+    <h2 class="step" id="s1"><b>1</b>データを選ぶ</h2>
+    <p class="say">まずは見本で試せます。慣れたら、お店の記録(CSVファイル)を入れてください。</p>
+    <div class="choices two">
+      <button type="button" data-ind="restaurant" data-sample="rest" aria-pressed="true"><span class="ico">🍽️</span>見本:飲食店の来客数</button>
+      <button type="button" data-ind="callcenter" data-sample="call" aria-pressed="false"><span class="ico">📞</span>見本:コールセンター(受ける電話)</button>
+      <button type="button" data-ind="logistics" data-sample="wh" aria-pressed="false"><span class="ico">📦</span>見本:倉庫の出荷件数</button>
+      <button type="button" data-ind="callcenter" data-sample="out" aria-pressed="false"><span class="ico">☎️</span>見本:コールセンター(かける電話)</button>
+      <label class="filebtn"><span><span class="ico">📂</span>自分のファイルを選ぶ</span><input type="file" id="fileIn" accept=".csv,.txt,.tsv"></label>
+    </div>
+    <p class="now" id="dataName">見本: 飲食店の来客数(2023〜2025年・作り物のデータ)</p>
+    <p class="safe"><span aria-hidden="true">🔒</span><span>ファイルはこのパソコン(スマホ)の中だけで計算します。インターネットには送りません。</span></p>
+    <p class="err" id="fileErr" hidden></p>
+    <div class="field" id="fileCheck" hidden></div>
+    <details class="fold" id="colFold">
+      <summary><span class="t">使う列</span><span class="now2" id="colFoldSum"></span></summary>
+      <div class="in">
+        <div class="field">
+          <label for="targetSel">予想したい数はどれですか</label>
+          <select id="targetSel"></select>
+        </div>
+        <div class="field" id="colRoles"></div>
+      </div>
+    </details>
+    <p class="notice warn" id="susNote" hidden></p>
+  </section>
+
+  <!-- ② 予測 -->
+  <section class="card" aria-labelledby="s2">
+    <h2 class="step" id="s2"><b>2</b>この先の予想</h2>
+    <div class="hero" id="hero"></div>
+    <div class="days" id="days"></div>
+    <p class="small" id="daysNote"></p>
+  </section>
+
+  <!-- ③ 必要な人数 -->
+  <section class="card" aria-labelledby="s3n">
+    <h2 class="step" id="s3n"><b>3</b>必要な人数</h2>
+    <div class="field">
+      <label for="staffMode">どの人数を出しますか</label>
+      <select id="staffMode">
+        <option data-ind="restaurant" value="shop">お店のスタッフの人数</option>
+        <option data-ind="callcenter" value="in">電話を受ける人数(入電)</option>
+        <option data-ind="logistics" value="wh">倉庫の作業人数</option>
+        <option data-ind="callcenter" value="out">電話をかける人数(架電)</option>
+        <option value="none">人数は出さない</option>
+      </select>
+    </div>
+    <details class="fold" id="staffFold">
+      <summary><span class="t">計算に使っている数字</span><span class="now2" id="staffFoldSum"></span></summary>
+      <div class="in">
+    <div class="inputs" data-ind="restaurant" id="staffShop">
+      <div class="field"><label for="shopCap">スタッフ1人が1日に対応できるお客さんの数</label><span class="num-in"><input type="number" id="shopCap" min="1" value="25">人</span></div>
+      <div class="field"><label for="shopMin">どんなに暇でも必要な最低人数</label><span class="num-in"><input type="number" id="shopMin" min="0" value="2">人</span></div>
+    </div>
+    <div class="inputs" data-ind="callcenter" id="staffIn">
+      <div class="field"><label for="inAht">1件の平均対応時間(後処理も含む)</label><span class="num-in"><input type="number" id="inAht" min="10" value="300">秒</span></div>
+      <div class="field"><label for="inHours">電話を受け付ける時間</label><span class="num-in"><input type="number" id="inHours" min="1" max="24" step="0.5" value="9">時間</span></div>
+      <div class="field"><span class="lbl">目標(何秒以内に、何%の電話に出るか)</span><span class="num-in"><input type="number" id="inSlSec" min="1" value="20" aria-label="何秒以内">秒以内に<input type="number" id="inSlPct" min="1" max="99" value="80" aria-label="何パーセント">%</span></div>
+      <div class="field"><label for="inShrink">休憩・研修などで電話に出られない割合</label><span class="num-in"><input type="number" id="inShrink" min="0" max="90" value="30">%</span></div>
+    </div>
+    <div class="inputs" data-ind="logistics" id="staffWh">
+      <div class="field" style="grid-column: 1 / -1">
+        <span class="lbl">工程ごとの担当(会社に合わせて足したり消したりできます)</span>
+        <div class="menus" id="whSteps"></div>
+        <button type="button" id="whAdd" style="justify-self:start">+ 工程を足す</button>
+      </div>
+      <div class="field"><label for="whInCol">入荷件数の列</label><select id="whInCol"></select></div>
+      <div class="field"><label for="whHours">1人の作業時間(1日)</label><span class="num-in"><input type="number" id="whHours" min="0.5" max="24" step="0.5" value="8">時間</span></div>
+      <div class="field"><label for="whShrink">休憩・朝礼・移動などで作業できない割合</label><span class="num-in"><input type="number" id="whShrink" min="0" max="90" value="15">%</span></div>
+    </div>
+    <div class="inputs" data-ind="callcenter" id="staffOut">
+      <div class="field"><label for="outGoalType">月の目標は何で決まっていますか</label><select id="outGoalType"><option value="calls">架電件数</option><option value="hours">稼働時間</option></select></div>
+      <div class="field"><label for="outGoal">今月の目標</label><span class="num-in"><input type="number" id="outGoal" min="0" step="100" value="20000"><span id="outGoalUnit">件</span></span></div>
+      <div class="field"><label for="outStaff">出勤人数の列(先の日は予定の人数)</label><select id="outStaff"></select></div>
+      <div class="field" id="outHoursColF"><label for="outHoursCol">稼働時間の列</label><select id="outHoursCol"></select></div>
+      <div class="field"><label for="outAbsent">欠勤率(予定のうち休む人の割合)</label><span class="num-in"><input type="number" id="outAbsent" min="0" max="90" step="0.5" value="8">%</span></div>
+      <div class="field"><label for="outHours">1人1日の稼働時間</label><span class="num-in"><input type="number" id="outHours" min="0.5" max="24" step="0.5" value="6.5">時間</span></div>
+      <div class="field"><label for="outRate">1人1時間あたりの平均架電数</label><span class="num-in"><input type="number" id="outRate" min="0.1" step="0.1" value="14">件</span></div>
+      <div class="field"><span class="lbl">平均架電数が分からないときは、1件にかかる時間から計算</span><span class="num-in">前処理<input type="number" id="outPre" min="0" value="30" aria-label="前処理の秒数">秒 通話<input type="number" id="outTalk" min="0" value="150" aria-label="通話の秒数">秒 後処理<input type="number" id="outPost" min="0" value="60" aria-label="後処理の秒数">秒</span><button type="button" id="outCalc" style="justify-self:start">この秒数で平均架電数を出す</button></div>
+    </div>
+        <p class="small saveNote">入れた数字は、このブラウザの中に自動で保存されます(外には送りません)。次に開いたときも、そのまま使えます。</p>
+      </div>
+    </details>
+    <div id="staffSum" class="field"></div>
+    <p class="notice warn" id="staffErr" hidden></p>
+    <div class="table-wrap"><table class="stbl" id="staffTbl"></table></div>
+    <p class="small" id="staffNote"></p>
+  </section>
+
+  <!-- 食品ロス(飲食だけ) -->
+  <section class="card" data-ind="restaurant" aria-labelledby="sLoss">
+    <h2 class="step" id="sLoss"><b>4</b>食品ロスの目安(仕込み量)</h2>
+    <p class="say">飲食店の食品ロスの大きな原因の一つは、来客数の読み違いによる仕込みすぎです。予想した来客数から仕込み量の目安を出します。さらに、「この予想で仕込んでいたら、どれだけ余って、どれだけ足りなかったか」を、いつものやり方と比べます。</p>
+    <details class="fold" id="lossFold">
+      <summary><span class="t">メニューと上乗せ</span><span class="now2" id="lossFoldSum"></span></summary>
+      <div class="in">
+    <div class="field">
+      <span class="lbl">主なメニュー(お客さん100人のうち何人が頼むか・1食の原価)</span>
+      <div class="menus" id="menus">
+        <div class="menu-row"><input type="text" value="日替わり定食" aria-label="メニュー1の名前"><span class="num-in"><input type="number" min="0" max="100" value="35" aria-label="メニュー1を頼む割合">%</span><span class="num-in"><input type="number" min="0" value="350" aria-label="メニュー1の原価">円</span></div>
+        <div class="menu-row"><input type="text" value="唐揚げ定食" aria-label="メニュー2の名前"><span class="num-in"><input type="number" min="0" max="100" value="25" aria-label="メニュー2を頼む割合">%</span><span class="num-in"><input type="number" min="0" value="300" aria-label="メニュー2の原価">円</span></div>
+        <div class="menu-row"><input type="text" value="カレー" aria-label="メニュー3の名前"><span class="num-in"><input type="number" min="0" max="100" value="20" aria-label="メニュー3を頼む割合">%</span><span class="num-in"><input type="number" min="0" value="200" aria-label="メニュー3の原価">円</span></div>
+      </div>
+      <p class="small">割合と原価は、POSのメニュー別の売上を1か月分見て入れてください。</p>
+    </div>
+    <div class="field"><label for="lossMargin">品切れしないための上乗せ</label><span class="num-in"><input type="number" id="lossMargin" min="0" max="100" value="10">%</span></div>
+        <p class="small saveNote">入れた数字は、このブラウザの中に自動で保存されます(外には送りません)。</p>
+      </div>
+    </details>
+    <div id="lossSum" class="field"></div>
+    <div class="table-wrap"><table class="stbl" id="prepTbl"></table></div>
+    <p class="small" id="lossNote"></p>
+  </section>
+
+  <!-- 持ち出し -->
+  <section class="card" id="exportCard" aria-labelledby="sEx">
+    <h2 class="step" id="sEx"><b>5</b>結果を保存・印刷する</h2>
+    <p class="say">シフト表や発注に写すときに使えます。CSVはExcelでそのまま開けます。</p>
+    <div class="btnrow">
+      <button type="button" class="primary" id="csvBtn">CSVで保存<span>予想と人数の表(Excelで開けます)</span></button>
+      <button type="button" id="printBtn">印刷する<span>予想と人数の表だけを紙1〜2枚に</span></button>
+    </div>
+    <p class="notice" id="exportNote" hidden></p>
+  </section>
+
+  <!-- ④ 当たり具合 -->
+  <section class="card" id="checkCard" aria-labelledby="s3">
+    <h2 class="step" id="s3"><b>6</b>この予想、信じていい?</h2>
+    <p class="say" id="checkLead"></p>
+    <div class="compare">
+      <div class="cmp ours"><div class="top"><span class="name">このツールの外れ方</span><span class="pct" id="oursPct">–</span></div><div class="track"><i id="oursBar"></i></div></div>
+      <div class="cmp"><div class="top"><span class="name">いつものやり方(先週の同じ曜日の数をそのまま使う)</span><span class="pct" id="basePct">–</span></div><div class="track"><i id="baseBar"></i></div></div>
+    </div>
+    <p class="verdict" id="verdict"></p>
+    <p class="small">外れ方が8%なら、100人来る日で平均8人くらいのズレ、という意味です。小さいほどよく当たっています。</p>
+    <p class="notice" id="fitNote" hidden></p>
+
+    <div class="btnrow">
+      <button type="button" class="primary" id="autoBtn">おまかせで精度を上げる<span>いろいろな設定を自動で試します</span></button>
+    </div>
+    <p class="notice" id="actionNote" hidden></p>
+
+    <div class="field">
+      <span class="lbl">これまでの実際の数と予想の比べ</span>
+      <p class="small" style="margin:0">線が重なっているほど、よく当たっています。予想の線は、毎日「その日より前の記録だけ」で出し直したものです。</p>
+    </div>
+    <div class="ranges" role="group" aria-label="グラフの範囲">
+      <button type="button" data-range="60" aria-pressed="false">最近2か月</button>
+      <button type="button" data-range="180" aria-pressed="true">最近半年</button>
+      <button type="button" data-range="all" aria-pressed="false">確かめた期間すべて</button>
+    </div>
+    <canvas id="chart" aria-label="実際の数と予想のグラフ"></canvas>
+    <div class="legend">
+      <span><i style="background:var(--actual)"></i>実際の数</span>
+      <span><i style="background:var(--accent)"></i>このツールの予想</span>
+      <span><i class="box" style="background:var(--tune-bg);outline:1px solid var(--tune)"></i>練習期間</span>
+      <span><i class="box" style="background:var(--check-bg);outline:1px solid var(--check)"></i>本番期間</span>
+    </div>
+  </section>
+
+  <!-- 詳しい設定 -->
+  <details class="card">
+    <summary>詳しい設定(慣れてきた方向け)</summary>
+    <div class="adv">
+      <p class="small">さわらなくても使えます。変えるとすぐに「この予想、信じていい?」の成績が計算し直されます。迷ったら一番下の「最初の設定に戻す」を押してください。</p>
+
+      <h3>成績のくわしい数字</h3>
+      <div class="scores">
+        <div class="score" style="--c:var(--tune)"><span>練習期間の外れ方</span><span class="big" id="tuneBig">–</span><span class="pill" id="tunePill"></span><span class="sub" id="tuneSub"></span></div>
+        <div class="score" style="--c:var(--check)"><span>本番期間の外れ方</span><span class="big" id="checkBig">–</span><span class="pill" id="checkPill"></span><span class="sub" id="checkSub"></span></div>
+      </div>
+
+      <h3>予想の決め手になっている情報</h3>
+      <p class="small">棒が長いほど、予想に強く効いています。</p>
+      <div class="bars" id="bars"></div>
+
+      <h3>期間</h3>
+      <div class="prow"><span class="name"><span class="sw" style="background:var(--tune)"></span>練習期間</span><input type="date" id="tuneFrom" aria-label="練習期間の始まり"><span>〜</span><input type="date" id="tuneTo" aria-label="練習期間の終わり"></div>
+      <div class="prow"><span class="name"><span class="sw" style="background:var(--check)"></span>本番期間</span><input type="date" id="checkFrom" aria-label="本番期間の始まり"><span>〜</span><input type="date" id="checkTo" aria-label="本番期間の終わり"></div>
+      <p class="small">どちらの期間も、毎日「その日より前の記録だけ」で予想して、実際の数と答え合わせします。違いは使い道です。練習期間は、設定(下のスライダーなど)を選ぶための練習問題です。何度やり直しても構いません。本番期間は、設定選びには一切使わず、最後に成績を見るためだけの本番のテストです。練習でだけ良い点が出る設定(過去に合わせすぎた設定)を見抜くために分けています。予想に使う記録の長さは、この期間ではなく「どれくらい昔の記録から学ぶか」で決まります。</p>
+
+      <h3>予想のしかた</h3>
+      <div class="slider">
+        <label for="horizon"><span>何日先を予想するか</span><span class="val" id="horizonV"></span></label>
+        <input type="range" id="horizon" min="1" max="14" step="1" value="1">
+      </div>
+      <div class="field">
+        <span class="lbl" style="font-weight:500">何日前の数を参考にするか</span>
+        <div class="checks" id="lagChecks"></div>
+        <p class="small">予想する時点でまだ分からない日は、自動で選べなくなります。</p>
+      </div>
+      <div class="slider">
+        <label for="window"><span>何日分をならして見るか</span><span class="val" id="windowV"></span></label>
+        <input type="range" id="window" min="3" max="91" step="1" value="28">
+      </div>
+      <div class="slider">
+        <label for="trainDays"><span>どれくらい昔の記録から学ぶか</span><span class="val" id="trainDaysV"></span></label>
+        <input type="range" id="trainDays" min="0" max="4" step="1" value="0">
+      </div>
+      <div class="slider">
+        <label for="alpha"><span>くせの覚え方(左=細かく/右=おおまかに)</span><span class="val" id="alphaV"></span></label>
+        <input type="range" id="alpha" min="0" max="6" step="1" value="2">
+      </div>
+      <div class="field">
+        <span class="lbl" style="font-weight:500">予想に使う情報</span>
+        <div class="checks">
+          <label class="check"><input type="checkbox" id="useDow" checked>曜日</label>
+          <label class="check"><input type="checkbox" id="useDom" checked>日にち(給料日・月末)</label>
+          <label class="check"><input type="checkbox" id="useMonth" checked>月</label>
+          <label class="check"><input type="checkbox" id="useHoliday" checked>祝日・連休</label>
+          <label class="check"><input type="checkbox" id="logTarget">増え方を「何倍」で見る</label>
+        </div>
+      </div>
+      <h3>念のための検査</h3>
+      <p class="small">予想の計算そのものは毎回同じ手順で動くプログラムなので、普段は押す必要はありません。計算の仕組みを人に説明したいときなどに使えます。</p>
+      <div><button type="button" id="leakBtn">未来の記録を見ていないか検査する</button></div>
+      <p class="notice" id="leakNote" hidden></p>
+      <div><button type="button" id="defaultBtn">最初の設定に戻す</button></div>
+      <div><button type="button" id="forgetBtn">保存した数字(人数・メニューなど)を消す</button></div>
+      <p class="notice" id="forgetNote" hidden></p>
+      <footer id="foot">外れ方 = 予想と実際の差の合計 ÷ 実際の数の合計。「いつものやり方」は先週の同じ曜日の数をそのまま使う方法です。</footer>
+    </div>
+  </details>
+</div>
+
+<script>
+// 予測エンジン(ブラウザ版の試作)。日次データ専用。
+// 時刻 t の予測に使うのは t-h 以前の実績と、事前に分かる列(予約数・天気予報・暦)だけ。
+// 起点 o で学習したモデルは、目的日 o+h 〜 o+h+refit-1 にだけ使う(学習は目的日が o 以前の行のみ)。
+(function (root) {
+  "use strict";
+
+  // 日本の祝日は法律の決まりから計算する(毎年の手直しが要らない)。春分・秋分は1980〜2099年に使える近似式。
+  // 振替休日(日曜の祝日の次の平日)と国民の休日(祝日に挟まれた日)も含む。年ごとに一度だけ計算して覚えておく。
+  const holidayCache = new Map();
+  function holidaysOf(y) {
+    if (holidayCache.has(y)) return holidayCache.get(y);
+    const out = new Set(), key = (m, d) => iso(Date.UTC(y, m - 1, d));
+    const nthMon = (m, n) => { const w = new Date(Date.UTC(y, m - 1, 1)).getUTCDay(); return 1 + ((8 - w) % 7) + 7 * (n - 1); };
+    const add = (m, d) => out.add(key(m, d));
+    const k = y - 1980;
+    add(1, 1); add(1, nthMon(1, 2)); add(2, 11);
+    if (y >= 2020) add(2, 23); else if (y >= 1989 && y <= 2018) add(12, 23);
+    add(3, Math.floor(20.8431 + 0.242194 * k - Math.floor(k / 4)));
+    add(4, 29); add(5, 3); add(5, 4); add(5, 5);
+    if (y === 2020) { add(7, 23); add(7, 24); add(8, 10); }
+    else if (y === 2021) { add(7, 22); add(7, 23); add(8, 8); }
+    else { add(7, nthMon(7, 3)); if (y >= 2016) add(8, 11); add(10, nthMon(10, 2)); }
+    add(9, nthMon(9, 3));
+    add(9, Math.floor(23.2488 + 0.242194 * k - Math.floor(k / 4)));
+    add(11, 3); add(11, 23);
+    if (y === 2019) { add(5, 1); add(10, 22); }
+    const base = [...out].sort();
+    // 国民の休日: 前の日と次の日が祝日の、祝日でない日(日曜は除く)
+    for (const ds of base) {
+      const t = Date.parse(ds) + 2 * DAY;
+      if (out.has(iso(t)) && !out.has(iso(t - DAY)) && new Date(t - DAY).getUTCDay() !== 0) out.add(iso(t - DAY));
+    }
+    // 振替休日: 日曜の祝日のあと、最初の祝日でない日
+    for (const ds of [...out].sort()) {
+      let t = Date.parse(ds);
+      if (new Date(t).getUTCDay() !== 0) continue;
+      do t += DAY; while (out.has(iso(t)));
+      if (new Date(t).getUTCFullYear() === y) out.add(iso(t));
+    }
+    holidayCache.set(y, out);
+    return out;
+  }
+  const JP_HOLIDAYS = { has: (ds) => holidaysOf(+ds.slice(0, 4)).has(ds) };
+
+  const DAY = 86400000;
+  const iso = (t) => new Date(t).toISOString().slice(0, 10);
+
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6d2b79f5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function poisson(rng, lam) {
+    const L = Math.exp(-lam); let k = 0, p = 1;
+    do { k++; p *= rng(); } while (p > L);
+    return k - 1;
+  }
+
+  // 飲食店の来客数を模した見本(2023〜2025年の実績+2026年1月の最初の7日は予約と天気予報だけ)
+  function sampleRestaurant() {
+    const rng = mulberry32(7);
+    const rows = [];
+    const start = Date.UTC(2023, 0, 1), end = Date.UTC(2026, 0, 7), last = Date.UTC(2025, 11, 31);
+    const dowEff = [1.3, 0.85, 0.8, 0.9, 0.95, 1.2, 1.45]; // 日〜土
+    for (let t = start, i = 0; t <= end; t += DAY, i++) {
+      const d = new Date(t), ds = iso(t);
+      const doy = Math.floor((t - Date.UTC(d.getUTCFullYear(), 0, 1)) / DAY) + 1;
+      const season = 1 + 0.12 * Math.sin((2 * Math.PI * (doy - 80)) / 365);
+      const hol = JP_HOLIDAYS.has(ds) ? 1.35 : 1;
+      const rain = rng() < 0.3 ? 1 : 0;
+      const trend = 1 + 0.15 * (i / 1095);
+      const level = 80 * dowEff[d.getUTCDay()] * season * hol * trend * (1 - 0.18 * rain);
+      const resv = poisson(rng, level * 0.3);
+      const walk = poisson(rng, level * 0.7);
+      const visitors = resv + walk;
+      const sales = Math.round(visitors * 2400 + (rng() - 0.5) * 6000);
+      rows.push({ 日付: ds, 来客数: t <= last ? visitors : "", 予約数: resv, 雨予報: rain, 売上: t <= last ? sales : "" });
+    }
+    return rows;
+  }
+
+  // コールセンターの入電数を模した見本(平日中心・月曜が多い・25日の請求日前後に増える・土日祝は少ない)。
+  // 入電はキャンペーンやイベント(CM放送・DM発送)で大きく動くので、その予定を「前もって分かる列」として持つ
+  function sampleCallcenter() {
+    const rng = mulberry32(11);
+    const rows = [];
+    const start = Date.UTC(2023, 0, 1), end = Date.UTC(2026, 0, 7), last = Date.UTC(2025, 11, 31);
+    const dowEff = [0.25, 1.35, 1.1, 1.0, 0.95, 1.05, 0.35]; // 日〜土
+    let dmPrev = 0, campLeft = 0;
+    for (let t = start, i = 0; t <= end; t += DAY, i++) {
+      const d = new Date(t), ds = iso(t), dom = d.getUTCDate();
+      const hol = JP_HOLIDAYS.has(ds);
+      const billing = dom >= 25 && dom <= 28 ? 1.3 : 1;
+      const dm = d.getUTCDay() >= 1 && d.getUTCDay() <= 5 && rng() < 0.08 ? 1 : 0;
+      if (campLeft === 0 && rng() < 0.025) campLeft = 5 + Math.floor(rng() * 10);
+      if (t === Date.UTC(2026, 0, 5)) campLeft = 10; // 先の7日にキャンペーンが始まる例
+      const camp = campLeft > 0 ? 1 : 0; if (campLeft > 0) campLeft--;
+      const cm = rng() < 0.03 ? 1 : 0;
+      const trend = 1 + 0.1 * (i / 1095);
+      const lam = 420 * dowEff[d.getUTCDay()] * (hol ? 0.3 : 1) * billing * trend * (dmPrev ? 1.4 : 1) * (camp ? 1.45 : 1) * (cm ? 1.8 : 1);
+      const calls = Math.max(0, Math.round(lam + (rng() - 0.5) * 2 * Math.sqrt(lam) * 1.7));
+      rows.push({ 日付: ds, 入電数: t <= last ? calls : "", キャンペーン中: camp, CM放送日: cm, DM発送の翌日: dmPrev });
+      dmPrev = dm;
+    }
+    return rows;
+  }
+
+  // コールセンターの架電数を模した見本。月の目標(件数か稼働時間)に向けてシフトを組む。
+  // 実際の架電数・稼働時間は出勤人数と新人の割合で変わる結果の数。出勤人数は、先の日は予定の人数(欠勤は画面で欠勤率として差し引く)
+  // 実績は2026年1月14日まで、1月15日〜31日は予定だけ(月の途中で着地を見込む例)
+  function sampleOutbound() {
+    const rng = mulberry32(23);
+    const rows = [];
+    const start = Date.UTC(2023, 0, 1), end = Date.UTC(2026, 0, 31), last = Date.UTC(2026, 0, 14);
+    const dowEff = [0, 0.92, 1.0, 1.03, 1.02, 0.97, 0]; // 月曜は朝礼・引き継ぎで少なめ、土日は休み
+    for (let t = start, i = 0; t <= end; t += DAY, i++) {
+      const d = new Date(t), ds = iso(t), dow = d.getUTCDay();
+      const open = dowEff[dow] > 0 && !JP_HOLIDAYS.has(ds) && !(d.getUTCMonth() === 0 && d.getUTCDate() <= 3) && !(d.getUTCMonth() === 11 && d.getUTCDate() >= 29);
+      const planned = open ? 10 + Math.floor(rng() * 6) : 0;
+      let absent = 0; for (let k = 0; k < planned; k++) if (rng() < 0.08) absent++;
+      const came = planned - absent;
+      const rookies = open ? Math.min(came, Math.floor(rng() * 4)) : 0;
+      const skill = 1 + 0.08 * (i / 1110);
+      const lam = open ? ((came - rookies) * 92 + rookies * 52) * dowEff[dow] * skill : 0;
+      const calls = open ? Math.max(0, Math.round(lam + (rng() - 0.5) * 2 * Math.sqrt(lam) * 2.2)) : 0;
+      const hours = open ? Math.round(came * (6.5 + (rng() - 0.5) * 0.6) * 10) / 10 : 0;
+      const past = t <= last;
+      rows.push({ 日付: ds, 架電数: past ? calls : "", 稼働時間: past ? hours : "", 出勤人数: past ? came : planned, 新人の人数: rookies });
+    }
+    return rows;
+  }
+
+  // 物流倉庫の見本。出荷(アウトバウンド)と入荷(インバウンド)は1人の処理件数が違うので、別の列で持つ
+  // 出荷: 週末の注文が月曜に出る・日曜は少ない・12月とセールで増える。入荷: 平日中心で、セールの数日前に増える
+  function sampleLogistics() {
+    const rng = mulberry32(31);
+    const rows = [];
+    const start = Date.UTC(2023, 0, 1), end = Date.UTC(2026, 0, 7), last = Date.UTC(2025, 11, 31);
+    const dowEff = [0.35, 1.45, 1.1, 1.0, 1.0, 1.05, 0.7]; // 日〜土
+    const inEff = [0, 1.1, 1.05, 1.0, 1.0, 0.95, 0.3];
+    const sales = [];
+    for (let t = start; t <= end; t += DAY) { const w = new Date(t).getUTCDay(); sales.push(w >= 1 && w <= 5 && rng() < 0.06 ? 1 : 0); }
+    for (let t = start, i = 0; t <= end; t += DAY, i++) {
+      const d = new Date(t), ds = iso(t), m = d.getUTCMonth() + 1;
+      const hol = JP_HOLIDAYS.has(ds) ? 0.5 : 1;
+      const season = m === 12 ? 1.35 : m === 11 ? 1.12 : m === 2 ? 0.9 : 1;
+      const sale = sales[i], saleSoon = sales.slice(i + 1, i + 4).some((x) => x) ? 1 : 0;
+      const trend = 1 + 0.2 * (i / 1095);
+      const lam = 1200 * dowEff[d.getUTCDay()] * hol * season * trend * (sale ? 1.6 : 1);
+      const n = Math.max(0, Math.round(lam + (rng() - 0.5) * 2 * Math.sqrt(lam) * 2.5));
+      const lamIn = 900 * inEff[d.getUTCDay()] * (JP_HOLIDAYS.has(ds) ? 0.2 : 1) * season * trend * (saleSoon ? 1.5 : 1);
+      const nIn = Math.max(0, Math.round(lamIn + (rng() - 0.5) * 2 * Math.sqrt(lamIn + 1) * 3));
+      rows.push({ 日付: ds, 出荷件数: t <= last ? n : "", 入荷件数: t <= last ? nIn : "", セール: sale, セールの3日前まで: saleSoon });
+    }
+    return rows;
+  }
+
+  // ---- 必要人数
+  // 受ける電話: アーランC。1日の入電が受付時間に均等に来ると仮定した目安
+  function erlangStaff(callsPerDay, ahtSec, openHours, slPct, slSec, shrinkPct) {
+    if (!(callsPerDay > 0) || !(ahtSec > 0) || !(openHours > 0)) return { agents: 0, staff: 0, sl: NaN };
+    const A = (callsPerDay / (openHours * 3600)) * ahtSec;
+    for (let N = Math.max(1, Math.floor(A) + 1); N < A + 500; N++) {
+      let term = 1, sum = 1; // A^k/k! を k=0..N-1 まで足す
+      for (let k = 1; k < N; k++) { term *= A / k; sum += term; }
+      const top = term * (A / N) * (N / (N - A));
+      const pw = top / (sum + top);
+      const sl = 1 - pw * Math.exp((-(N - A) * slSec) / ahtSec);
+      if (sl >= slPct / 100) return { agents: N, staff: Math.ceil(N / (1 - shrinkPct / 100)), sl };
+    }
+    return { agents: NaN, staff: NaN, sl: NaN };
+  }
+
+  // かける電話など: 前もって分かる列(シフト人数など)を変えたら次の7日の予測がどうなるか。モデルは1回だけ学習する
+  function whatIfAhead(S, target, cfg, col, values, k = 7) {
+    const y = S.data[target];
+    let lastObs = -1;
+    for (let i = y.length - 1; i >= 0; i--) if (!isNaN(y[i])) { lastObs = i; break; }
+    const out = [];
+    for (let step = 1; step <= k; step++) {
+      const i = lastObs + step;
+      if (i >= S.days.length) break;
+      const c = { ...cfg, horizon: Math.max(cfg.horizon, step) };
+      const F = features(S, target, c);
+      const rows = [];
+      const lo = Math.max(F.warm, c.trainDays ? lastObs - c.trainDays + 1 : 0);
+      for (let r = lo; r <= lastObs; r++) if (!isNaN(F.y[r])) rows.push(r);
+      const M = fitRidge(F, F.y, rows, c.alpha);
+      const j = F.names.indexOf(`${col}(事前に分かる)`);
+      const vs = typeof values === "function" ? values(i) : values;
+      const preds = vs.map((v) => {
+        if (j < 0) return NaN;
+        const old = F.cols[j][i];
+        F.cols[j][i] = v;
+        const p = predictRow(M, F, i);
+        F.cols[j][i] = old;
+        return c.logTarget ? Math.expm1(p) : p;
+      });
+      out.push({ t: S.days[i], idx: i, preds });
+    }
+    return out;
+  }
+
+  // ---- CSV
+  function parseCSV(text) {
+    const lines = [];
+    let row = [], cell = "", q = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (q) {
+        if (c === '"' && text[i + 1] === '"') { cell += '"'; i++; }
+        else if (c === '"') q = false;
+        else cell += c;
+      } else if (c === '"') q = true;
+      else if (c === "," || c === "\t") { row.push(cell); cell = ""; }
+      else if (c === "\n" || c === "\r") {
+        if (c === "\r" && text[i + 1] === "\n") i++;
+        row.push(cell); cell = "";
+        if (row.some((x) => x.trim() !== "")) lines.push(row);
+        row = [];
+      } else cell += c;
+    }
+    row.push(cell);
+    if (row.some((x) => x.trim() !== "")) lines.push(row);
+    if (lines.length < 2) throw new Error("行が足りません。1行目に列名、2行目から日付と数字が並ぶCSVを入れてください。");
+    const head = lines[0].map((h) => h.trim().replace(/^﻿/, ""));
+    return lines.slice(1).map((r) => Object.fromEntries(head.map((h, j) => [h, (r[j] ?? "").trim()])));
+  }
+
+  function toDate(s) {
+    if (!s) return NaN;
+    const m = String(s).match(/^(\d{4})[-/.年](\d{1,2})[-/.月](\d{1,2})/);
+    if (!m) return NaN;
+    return Date.UTC(+m[1], +m[2] - 1, +m[3]);
+  }
+  const num = (v) => (v === "" || v == null || isNaN(+String(v).replace(/,/g, "")) ? NaN : +String(v).replace(/,/g, ""));
+
+  // 列の役割を推定: 日付列・目的の列(最初の数値列)・その他
+  function inferColumns(rows) {
+    const cols = Object.keys(rows[0]);
+    const n = Math.min(rows.length, 50);
+    const dateCol = cols.find((c) => rows.slice(0, n).filter((r) => !isNaN(toDate(r[c]))).length >= n * 0.8);
+    if (!dateCol) throw new Error("日付の列が見つかりません。2025-01-31 や 2025/1/31 の形の列を入れてください。");
+    const numeric = cols.filter((c) => c !== dateCol && rows.slice(0, n).filter((r) => !isNaN(num(r[c]))).length >= n * 0.6);
+    if (!numeric.length) throw new Error("数字の列が見つかりません。予測したい数(来客数など)の列を入れてください。");
+    return { dateCol, numeric };
+  }
+
+  // 日付を毎日の格子に並べ直す。欠けた日は NaN のまま(埋めない)
+  function buildSeries(rows, dateCol, cols) {
+    const map = new Map();
+    for (const r of rows) {
+      const t = toDate(r[dateCol]);
+      if (!isNaN(t)) map.set(t, r);
+    }
+    const ts = [...map.keys()].sort((a, b) => a - b);
+    if (ts.length < 60) throw new Error(`日付が${ts.length}日分しかありません。60日分以上入れてください。`);
+    const days = [];
+    for (let t = ts[0]; t <= ts[ts.length - 1]; t += DAY) days.push(t);
+    const data = {};
+    for (const c of cols) data[c] = days.map((t) => (map.has(t) ? num(map.get(t)[c]) : NaN));
+    return { days, data };
+  }
+
+  // ---- 特徴量
+  function features(S, target, cfg) {
+    const { days } = S, n = days.length, h = cfg.horizon;
+    const y = S.data[target].map((v) => (cfg.logTarget && !isNaN(v) ? Math.log1p(Math.max(v, 0)) : v));
+    const names = [], cols = [];
+    const add = (name, arr) => { names.push(name); cols.push(arr); };
+    const shift = (a, k) => a.map((_, i) => (i - k >= 0 && i - k < n ? a[i - k] : NaN));
+
+    for (const L of cfg.lags) if (L >= h) add(`${L}日前の実績`, shift(y, L));
+    const base = shift(y, h);
+    const w = cfg.window;
+    const rm = new Array(n).fill(NaN), rs = new Array(n).fill(NaN);
+    for (let i = 0; i < n; i++) {
+      let s = 0, s2 = 0, c = 0;
+      for (let j = Math.max(0, i - w + 1); j <= i; j++) if (!isNaN(base[j])) { s += base[j]; s2 += base[j] * base[j]; c++; }
+      if (c >= Math.max(1, w / 2)) { rm[i] = s / c; rs[i] = Math.sqrt(Math.max(0, s2 / c - (s / c) ** 2)); }
+    }
+    add(`直近${w}日の平均`, rm);
+    add(`直近${w}日のばらつき`, rs);
+    const k0 = Math.max(1, Math.ceil(h / 7));
+    add("同じ曜日の直近4回の平均", y.map((_, i) => {
+      let s = 0, c = 0;
+      for (let k = 0; k < 4; k++) { const j = i - 7 * (k0 + k); if (j >= 0 && !isNaN(y[j])) { s += y[j]; c++; } }
+      return c ? s / c : NaN;
+    }));
+    if (cfg.useDow) for (let d = 1; d < 7; d++) add(`曜日=${"日月火水木金土"[d]}`, days.map((t) => (new Date(t).getUTCDay() === d ? 1 : 0)));
+    if (cfg.useMonth) for (let m = 2; m <= 12; m++) add(`${m}月`, days.map((t) => (new Date(t).getUTCMonth() + 1 === m ? 1 : 0)));
+    if (cfg.useDom) {
+      const bins = [[6, 10], [11, 15], [16, 20], [21, 24], [25, 28], [29, 31]];
+      for (const [a, b] of bins) add(`${a}〜${b}日`, days.map((t) => { const dd = new Date(t).getUTCDate(); return dd >= a && dd <= b ? 1 : 0; }));
+    }
+    if (cfg.useHoliday) {
+      const hol = days.map((t) => (JP_HOLIDAYS.has(iso(t)) ? 1 : 0));
+      add("祝日", hol);
+      add("祝日の前日", days.map((t) => (JP_HOLIDAYS.has(iso(t + DAY)) ? 1 : 0)));
+      add("祝日の翌日", days.map((t) => (JP_HOLIDAYS.has(iso(t - DAY)) ? 1 : 0)));
+    }
+    for (const c of cfg.known) add(`${c}(事前に分かる)`, S.data[c]);
+    for (const c of cfg.past) add(`${h}日前の${c}`, shift(S.data[c], h));
+    const warm = Math.max(...cfg.lags.filter((L) => L >= h), h + w, 7 * (k0 + 3), 1);
+    return { y, names, cols, warm };
+  }
+
+  // ---- リッジ回帰(標準化して正規方程式を解く)
+  function fitRidge(F, y, rows, alpha) {
+    const p = F.cols.length;
+    const med = [], mu = [], sd = [];
+    for (let j = 0; j < p; j++) {
+      const v = rows.map((i) => F.cols[j][i]).filter((x) => !isNaN(x)).sort((a, b) => a - b);
+      med[j] = v.length ? v[Math.floor(v.length / 2)] : 0;
+      const vals = rows.map((i) => (isNaN(F.cols[j][i]) ? med[j] : F.cols[j][i]));
+      mu[j] = vals.reduce((a, b) => a + b, 0) / vals.length;
+      sd[j] = Math.sqrt(vals.reduce((a, b) => a + (b - mu[j]) ** 2, 0) / vals.length) || 1;
+    }
+    const ym = rows.reduce((a, i) => a + y[i], 0) / rows.length;
+    const A = Array.from({ length: p }, () => new Float64Array(p + 1));
+    const x = new Float64Array(p);
+    for (const i of rows) {
+      for (let j = 0; j < p; j++) { const v = F.cols[j][i]; x[j] = ((isNaN(v) ? med[j] : v) - mu[j]) / sd[j]; }
+      const r = y[i] - ym;
+      for (let a = 0; a < p; a++) {
+        const xa = x[a]; if (xa === 0) continue;
+        const Aa = A[a];
+        for (let b = a; b < p; b++) Aa[b] += xa * x[b];
+        Aa[p] += xa * r;
+      }
+    }
+    for (let a = 0; a < p; a++) { for (let b = 0; b < a; b++) A[a][b] = A[b][a]; A[a][a] += alpha * rows.length; }
+    // ガウスの消去法
+    for (let c = 0; c < p; c++) {
+      let piv = c;
+      for (let r = c + 1; r < p; r++) if (Math.abs(A[r][c]) > Math.abs(A[piv][c])) piv = r;
+      [A[c], A[piv]] = [A[piv], A[c]];
+      const d = A[c][c] || 1e-12;
+      for (let r = 0; r < p; r++) {
+        if (r === c) continue;
+        const f = A[r][c] / d; if (f === 0) continue;
+        for (let k = c; k <= p; k++) A[r][k] -= f * A[c][k];
+      }
+    }
+    const beta = A.map((row, j) => row[p] / (row[j] || 1e-12));
+    return { beta, med, mu, sd, ym };
+  }
+  function predictRow(M, F, i) {
+    let s = M.ym;
+    for (let j = 0; j < F.cols.length; j++) {
+      const v = F.cols[j][i];
+      s += (((isNaN(v) ? M.med[j] : v) - M.mu[j]) / M.sd[j]) * M.beta[j];
+    }
+    return s;
+  }
+
+  // ---- ウォークフォワード
+  function walkForward(S, target, cfg, fromT, toT) {
+    const F = features(S, target, cfg);
+    const { days } = S, h = cfg.horizon, n = days.length;
+    const first = Math.max(days.findIndex((t) => t >= fromT), F.warm + 30 + h);
+    let last = -1;
+    for (let i = n - 1; i >= 0; i--) if (days[i] <= toT) { last = i; break; }
+    const pred = new Array(n).fill(NaN);
+    let importance = null;
+    if (first < 0 || last < first) return { pred, F, importance };
+    for (let o = first - h; o <= last - h; o += cfg.refit) {
+      const lo = Math.max(F.warm, cfg.trainDays ? o - cfg.trainDays + 1 : 0);
+      const rows = [];
+      for (let i = lo; i <= o; i++) if (!isNaN(F.y[i])) rows.push(i);
+      if (rows.length < 30) continue;
+      const M = fitRidge(F, F.y, rows, cfg.alpha);
+      for (let i = o + h; i <= Math.min(o + h + cfg.refit - 1, last); i++) {
+        const p = predictRow(M, F, i);
+        pred[i] = cfg.logTarget ? Math.expm1(p) : p;
+      }
+      importance = M.beta.map(Math.abs);
+    }
+    return { pred, F, importance };
+  }
+
+  // 学習のいらない基準: 先週の同じ曜日(h が 7 を超えるときは 14 日前…)
+  function snaive(S, target, h) {
+    const y = S.data[target], k = 7 * Math.max(1, Math.ceil(h / 7));
+    return y.map((_, i) => (i - k >= 0 ? y[i - k] : NaN));
+  }
+
+  function score(S, target, pred, fromT, toT) {
+    let ae = 0, sa = 0, n = 0, bias = 0;
+    S.days.forEach((t, i) => {
+      if (t < fromT || t > toT) return;
+      const a = S.data[target][i], p = pred[i];
+      if (isNaN(a) || isNaN(p)) return;
+      ae += Math.abs(p - a); sa += Math.abs(a); bias += p - a; n++;
+    });
+    return { n, wape: n ? ae / sa : NaN, mae: n ? ae / n : NaN, bias: n ? bias / n : NaN };
+  }
+
+  function evaluate(S, target, cfg, periods) {
+    const from = Math.min(periods.tune[0], periods.check[0]), to = Math.max(periods.tune[1], periods.check[1]);
+    const wf = walkForward(S, target, cfg, from, to);
+    const base = snaive(S, target, cfg.horizon);
+    const res = { wf, base };
+    for (const k of ["tune", "check"]) {
+      const m = score(S, target, wf.pred, ...periods[k]);
+      // 基準は、モデルが予測できた日だけで比べる
+      const bp = base.map((v, i) => (isNaN(wf.pred[i]) ? NaN : v));
+      const b = score(S, target, bp, ...periods[k]);
+      let total = 0; S.days.forEach((t) => { if (t >= periods[k][0] && t <= periods[k][1]) total++; });
+      res[k] = { model: m, base: b, skill: 1 - m.mae / b.mae, total };
+    }
+    return res;
+  }
+
+  // 次の7日の予測(k 日先は horizon=k のモデルで)
+  function forecastAhead(S, target, cfg, k = 7) {
+    const y = S.data[target];
+    let lastObs = -1;
+    for (let i = y.length - 1; i >= 0; i--) if (!isNaN(y[i])) { lastObs = i; break; }
+    const out = [];
+    for (let step = 1; step <= k; step++) {
+      const i = lastObs + step;
+      if (i >= S.days.length) break;
+      const c = { ...cfg, horizon: Math.max(cfg.horizon, step) };
+      const F = features(S, target, c);
+      const rows = [];
+      const lo = Math.max(F.warm, c.trainDays ? lastObs - c.trainDays + 1 : 0);
+      for (let r = lo; r <= lastObs; r++) if (!isNaN(F.y[r])) rows.push(r);
+      const M = fitRidge(F, F.y, rows, c.alpha);
+      const p = predictRow(M, F, i);
+      const missingKnown = cfg.known.filter((col) => isNaN(S.data[col][i]));
+      out.push({ t: S.days[i], value: c.logTarget ? Math.expm1(p) : p, missingKnown });
+    }
+    return out;
+  }
+
+  // 未来を乱数に書き換えても、切れ目+h までの予測が変わらないか
+  function leakTest(S, target, cfg, periods, cuts = 3, seed = 1) {
+    const rng = mulberry32(seed);
+    const from = Math.min(periods.tune[0], periods.check[0]), to = Math.max(periods.tune[1], periods.check[1]);
+    const base = walkForward(S, target, cfg, from, to).pred;
+    const idx = base.map((v, i) => (isNaN(v) ? -1 : i)).filter((i) => i >= 0);
+    const results = [];
+    for (let c = 0; c < cuts; c++) {
+      const cut = idx[Math.floor(rng() * (idx.length - 1))];
+      const bad = { days: S.days, data: {} };
+      for (const col of Object.keys(S.data)) {
+        const isKnown = cfg.known.includes(col);
+        const lim = isKnown ? cut + cfg.horizon : cut;
+        bad.data[col] = S.data[col].map((v, i) => (i > lim ? (rng() - 0.5) * 2e6 : v));
+      }
+      const p = walkForward(bad, target, cfg, from, to).pred;
+      let checked = 0, maxDiff = 0;
+      for (const i of idx) if (i <= cut + cfg.horizon) { checked++; maxDiff = Math.max(maxDiff, Math.abs(p[i] - base[i])); }
+      results.push({ cut: iso(S.days[cut]), checked, maxDiff });
+    }
+    return { ok: results.every((r) => r.maxDiff < 1e-6), results };
+  }
+
+  function suspicious(S, target, known) {
+    const y = S.data[target];
+    return known.filter((c) => {
+      const x = S.data[c];
+      const pairs = y.map((v, i) => [v, x[i]]).filter(([a, b]) => !isNaN(a) && !isNaN(b));
+      if (pairs.length < 10) return false;
+      const ma = pairs.reduce((s, p) => s + p[0], 0) / pairs.length, mb = pairs.reduce((s, p) => s + p[1], 0) / pairs.length;
+      let sab = 0, saa = 0, sbb = 0;
+      for (const [a, b] of pairs) { sab += (a - ma) * (b - mb); saa += (a - ma) ** 2; sbb += (b - mb) ** 2; }
+      return Math.abs(sab / Math.sqrt(saa * sbb)) >= 0.97;
+    });
+  }
+
+  // おまかせ調整: 調整期間だけで選ぶ。確認期間は選ぶのに使わない
+  function autoTune(S, target, cfg, periods, trials = 24, seed = 3) {
+    const rng = mulberry32(seed);
+    const pick = (a) => a[Math.floor(rng() * a.length)];
+    const lagsOpts = [[1, 7], [1, 2, 7, 14], [1, 2, 3, 7, 14, 28], [7, 14, 28]];
+    let best = null;
+    const seen = new Set();
+    for (let t = 0; t < trials; t++) {
+      const c = { ...cfg, lags: pick(lagsOpts), window: pick([7, 14, 28, 56]), trainDays: pick([0, 365, 730]), alpha: pick([0.001, 0.01, 0.03, 0.1, 0.3]), logTarget: pick([false, true]) };
+      const key = JSON.stringify([c.lags, c.window, c.trainDays, c.alpha, c.logTarget]);
+      if (seen.has(key)) continue; seen.add(key);
+      const wf = walkForward(S, target, c, periods.tune[0], periods.tune[1]);
+      const m = score(S, target, wf.pred, ...periods.tune);
+      if (!best || m.mae < best.mae) best = { cfg: c, mae: m.mae };
+    }
+    return { cfg: best.cfg, tried: seen.size };
+  }
+
+  root.ForecastEngine = { sampleRestaurant, sampleCallcenter, sampleOutbound, sampleLogistics, erlangStaff, whatIfAhead, parseCSV, inferColumns, buildSeries, evaluate, forecastAhead, leakTest, suspicious, autoTune, iso, DAY, toDate };
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<script>
+(function () {
+  "use strict";
+  const E = window.ForecastEngine;
+  const INDUSTRY = "restaurant";
+  document.querySelectorAll("[data-ind]").forEach((el) => { if (el.dataset.ind !== INDUSTRY) el.remove(); });
+  // 業種によってカードの数が違うので、番号は残ったカードに上から振り直す
+  document.querySelectorAll(".step b").forEach((b, i) => { b.textContent = i + 1; });
+  const $ = (id) => document.getElementById(id);
+  const LAGS = [1, 2, 3, 7, 14, 28];
+  const TRAIN = [0, 730, 365, 180, 90];
+  const TRAIN_LABEL = ["全部", "2年", "1年", "半年", "3か月"];
+  const ALPHA = [0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1];
+  const DEFAULT = { horizon: 1, lags: [1, 2, 7, 14], window: 28, trainIdx: 0, alphaIdx: 2, useDow: true, useDom: true, useMonth: true, useHoliday: true, logTarget: false };
+  const WD = "日月火水木金土";
+
+  const st = { rows: null, S: null, dateCol: null, target: null, numeric: [], roles: {}, ui: { ...DEFAULT }, range: "180", res: null, defaultRes: null };
+
+  // ---- データ
+  function loadRows(rows, name, presetRoles, isFile) {
+    const info = E.inferColumns(rows);
+    st.rows = rows; st.dateCol = info.dateCol; st.numeric = info.numeric; st.isFile = !!isFile;
+    st.S = E.buildSeries(rows, st.dateCol, st.numeric);
+    st.target = info.numeric.find((c) => !isFlag(c)) || info.numeric[0];
+    st.roles = {};
+    for (const c of info.numeric) if (c !== st.target) st.roles[c] = (presetRoles && presetRoles[c]) || "off";
+    $("dataName").textContent = name;
+    $("colFold").open = !!isFile; // 自分のファイルのときは、列の使い方を確かめてもらうので開いておく
+    setDefaultPeriods();
+    renderColumns();
+    fillStaffCols(); $("staffMode").value = guessMode();
+    st.defaultRes = null;
+    run(true);
+  }
+  function setDefaultPeriods() {
+    const y = st.S.data[st.target];
+    let lastIdx = y.length - 1; while (lastIdx > 0 && isNaN(y[lastIdx])) lastIdx--;
+    const end = st.S.days[lastIdx], start = st.S.days[0];
+    const span = end - start;
+    const checkLen = Math.min(365 * E.DAY, Math.round(span * 0.25));
+    const tuneLen = Math.min(184 * E.DAY, Math.round(span * 0.2));
+    const cf = end - checkLen + E.DAY, tf = cf - tuneLen;
+    $("tuneFrom").value = E.iso(tf); $("tuneTo").value = E.iso(cf - E.DAY);
+    $("checkFrom").value = E.iso(cf); $("checkTo").value = E.iso(end);
+  }
+  function renderColumns() {
+    const sel = $("targetSel");
+    // 0と1だけの列(セールの日=1 など)は「その日に何があるか」の印なので、予想したい数の候補には出さない
+    const flag = isFlag;
+    sel.innerHTML = st.numeric.filter((c) => c === st.target || !flag(c)).map((c) => `<option ${c === st.target ? "selected" : ""}>${esc(c)}</option>`).join("");
+    const box = $("colRoles");
+    const others = st.numeric.filter((c) => c !== st.target);
+    box.innerHTML = others.length ? `<span class="lbl">ほかの列は、予想する日の前に分かりますか</span>` + others.map((c, i) => `
+      <div class="colrow"><label for="role${i}">${esc(c)}${flag(c) ? `<span class="small" style="font-weight:400"> (その日にあれば1、なければ0の印)</span>` : ""}</label>
+      <select id="role${i}" data-col="${esc(c)}">
+        <option value="off" ${st.roles[c] === "off" ? "selected" : ""}>使わない</option>
+        <option value="known" ${st.roles[c] === "known" ? "selected" : ""}>前もって分かる(予約数・天気予報など)</option>
+        <option value="past" ${st.roles[c] === "past" ? "selected" : ""}>終わってから分かる(売上など)</option>
+      </select></div>`).join("") : "";
+    box.querySelectorAll("select").forEach((s) => s.addEventListener("change", () => { st.roles[s.dataset.col] = s.value; st.defaultRes = null; colSummary(); schedule(); }));
+    colSummary();
+  }
+  function colSummary() {
+    const pick = (r) => Object.keys(st.roles).filter((c) => st.roles[c] === r);
+    const k = pick("known"), p = pick("past");
+    $("colFoldSum").textContent = `予想する数: ${st.target}` + (k.length ? ` ・ 前もって分かる: ${k.join("・")}` : "") + (p.length ? ` ・ 終わってから分かる: ${p.join("・")}` : "");
+  }
+  const isFlag = (c) => st.S.data[c].every((v) => isNaN(v) || v === 0 || v === 1);
+  // 自分のファイルを入れたとき: 中身の先頭を見せ、何の数か分かりにくい列やデータの穴を知らせる
+  const GENERIC = /^(列|col|column|field|unnamed|データ|値|数値|項目|data|value|val|item|x|y)?[\s_:：.-]*\d*$/i;
+  function renderFileCheck() {
+    const box = $("fileCheck");
+    if (!st.isFile) { box.hidden = true; box.innerHTML = ""; return; }
+    const items = [], warn = (s) => items.push(`<li class="warn">⚠ ${s}</li>`), ok = (s) => items.push(`<li>${s}</li>`);
+    const cols = Object.keys(st.rows[0]);
+    ok(`日付の列は「${esc(st.dateCol)}」、予想したい数は「${esc(st.target)}」にしました。違っていたら、下で選び直してください。`);
+    const vague = st.numeric.filter((c) => GENERIC.test(c.trim()));
+    if (vague.length) warn(`「${vague.map(esc).join("」「")}」は、列の名前から何の数か分かりません。下の表で中身を見て確かめてください。ファイルの1行目に「来客数」などの名前を付けておくと、次から迷いません。`);
+    const unused = cols.filter((c) => c !== st.dateCol && !st.numeric.includes(c));
+    if (unused.length) ok(`数字ではない列「${unused.map(esc).join("」「")}」は使っていません。`);
+    const dup = st.rows.length - new Set(st.rows.map((r) => E.toDate(r[st.dateCol])).filter((v) => !isNaN(v))).size;
+    if (dup > 0) warn(`同じ日付の行が${dup}行ありました。後の行だけを使っています。時間帯ごとの記録なら、1日1行に合計してから入れてください。`);
+    const y = st.S.data[st.target], obs = y.filter((v) => !isNaN(v));
+    let last = y.length - 1; while (last > 0 && isNaN(y[last])) last--;
+    const holes = y.slice(0, last + 1).filter((v) => isNaN(v)).length;
+    if (holes) warn(`「${esc(st.target)}」が空欄の日(日付ごと抜けている日を含む)が${holes}日あります。休みの日なら0を入れると、休みも読めるようになります。空欄のままでも予想はできます。`);
+    if (obs.some((v) => v < 0)) warn(`「${esc(st.target)}」にマイナスの数が入っています。数え間違いや別の数字が混ざっていないか確かめてください。`);
+    if (new Set(obs).size <= 2) warn(`「${esc(st.target)}」は同じ数がほとんどで、予想する意味のある動きがありません。予想したい列が合っているか確かめてください。`);
+    if (obs.length < 365) warn(`記録が${obs.length}日分です。予想はこのままできますし、曜日ごとの動きも読めます。ただ、「12月に増える」のような1年の中の動きを読むには、1年分以上の記録が必要です。`);
+    const peek = st.rows.slice(0, 5);
+    box.innerHTML = `<span class="lbl">ファイルの中身の確認</span><ul class="checklist">${items.join("")}</ul>
+      <div class="table-wrap"><table class="peek"><thead><tr>${cols.map((c) => `<th>${esc(c) || "(名前なし)"}</th>`).join("")}</tr></thead><tbody>${peek.map((r) => `<tr>${cols.map((c) => `<td>${esc(r[c])}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+      <p class="small" style="margin:0">先頭の${peek.length}行です(全部で${st.rows.length}行)。</p>`;
+    box.hidden = false;
+  }
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const fmtMD = (t) => { const d = new Date(t); return `${d.getUTCMonth() + 1}/${d.getUTCDate()}(${WD[d.getUTCDay()]})`; };
+  // かける電話の見本のように、シフト人数が0の日は休み
+  const idxOf = (t) => st.S.days.indexOf(t);
+  const isClosed = (a) => $("staffMode").value === "out" && $("outStaff") && st.roles[$("outStaff").value] === "known" && st.S.data[$("outStaff").value]?.[idxOf(a.t)] === 0;
+  const unit = () => (/客|人/.test(st.target) ? "人" : /電|件|コール|呼/.test(st.target) ? "件" : "");
+
+  // ---- 設定
+  function cfgFromUI(u = st.ui) {
+    return {
+      horizon: u.horizon, lags: u.lags.length ? u.lags : [u.horizon], window: u.window, trainDays: TRAIN[u.trainIdx],
+      alpha: ALPHA[u.alphaIdx], refit: 7, useDow: u.useDow, useDom: u.useDom, useMonth: u.useMonth, useHoliday: u.useHoliday, logTarget: u.logTarget,
+      known: Object.keys(st.roles).filter((c) => st.roles[c] === "known"),
+      past: Object.keys(st.roles).filter((c) => st.roles[c] === "past"),
+    };
+  }
+  function periods() {
+    return { tune: [E.toDate($("tuneFrom").value), E.toDate($("tuneTo").value)], check: [E.toDate($("checkFrom").value), E.toDate($("checkTo").value)] };
+  }
+  function syncUI() {
+    const u = st.ui;
+    $("horizon").value = u.horizon; $("horizonV").textContent = `${u.horizon}日先`;
+    $("window").value = u.window; $("windowV").textContent = `${u.window}日分`;
+    $("trainDays").value = u.trainIdx; $("trainDaysV").textContent = TRAIN_LABEL[u.trainIdx];
+    $("alpha").value = u.alphaIdx; $("alphaV").textContent = `${u.alphaIdx + 1} / 7`;
+    for (const k of ["useDow", "useDom", "useMonth", "useHoliday", "logTarget"]) $(k).checked = u[k];
+    $("lagChecks").innerHTML = LAGS.map((L) => {
+      const dis = L < u.horizon;
+      return `<label class="check" style="${dis ? "opacity:.45" : ""}"><input type="checkbox" data-lag="${L}" ${u.lags.includes(L) ? "checked" : ""} ${dis ? "disabled" : ""}>${L}日前</label>`;
+    }).join("");
+    $("lagChecks").querySelectorAll("input").forEach((i) => i.addEventListener("change", () => {
+      const L = +i.dataset.lag;
+      u.lags = i.checked ? [...u.lags, L].sort((a, b) => a - b) : u.lags.filter((x) => x !== L);
+      schedule();
+    }));
+  }
+
+  // ---- 計算
+  let timer = null;
+  function schedule() { syncUI(); clearTimeout(timer); timer = setTimeout(() => run(false), 120); }
+  function run(isDefault) {
+    try {
+      const P = periods();
+      if ([...P.tune, ...P.check].some(isNaN) || P.tune[0] > P.tune[1] || P.check[0] > P.check[1]) throw new Error("期間の日付を見直してください(始まりが終わりより後になっています)。");
+      const cfg = cfgFromUI();
+      st.res = E.evaluate(st.S, st.target, cfg, P);
+      if (isDefault || !st.defaultRes) st.defaultRes = isDefault ? st.res : E.evaluate(st.S, st.target, cfgFromUI(DEFAULT), P);
+      st.ahead = E.forecastAhead(st.S, st.target, cfg);
+      $("fileErr").hidden = true;
+      render();
+    } catch (e) {
+      $("fileErr").textContent = e.message; $("fileErr").hidden = false;
+    }
+  }
+
+  const pct = (v) => (isNaN(v) ? "–" : Math.round(v * 100) + "%");
+  const pct1 = (v) => (isNaN(v) ? "–" : (v * 100).toFixed(1) + "%");
+  function skillPill(el, s) {
+    el.className = "pill " + (s >= 0.1 ? "good" : s >= 0 ? "warn" : "bad");
+    el.textContent = isNaN(s) ? "–" : s >= 0 ? `いつものやり方より${Math.round(s * 100)}%良い` : `いつものやり方より${Math.round(-s * 100)}%悪い`;
+  }
+  const fmtDate = (t) => { const d = new Date(t); return `${d.getUTCMonth() + 1}月${d.getUTCDate()}日`; };
+  function render() {
+    const r = st.res;
+    for (const k of ["tune", "check"]) {
+      $(k + "Big").textContent = pct1(r[k].model.wape);
+      $(k + "Sub").textContent = `いつものやり方 ${pct1(r[k].base.wape)} ・ 予想できた日 ${r[k].model.n}/${r[k].total}日`;
+      skillPill($(k + "Pill"), r[k].skill);
+    }
+    // 3. 当たり具合(答え合わせの期間で見せる)
+    const P = periods(), c = r.check;
+    $("checkLead").textContent = `${fmtDate(P.check[0])}〜${fmtDate(P.check[1])}の毎日について、「もし前もってこのツールで予想していたら」どれくらい当たっていたかを、実際の数と答え合わせしました。`;
+    const mo = c.model.wape, mb = c.base.wape, mx = Math.max(mo, mb) || 1;
+    $("oursPct").textContent = pct(mo); $("basePct").textContent = pct(mb);
+    $("oursBar").style.width = `${Math.max(2, (mo / mx) * 100)}%`; $("baseBar").style.width = `${Math.max(2, (mb / mx) * 100)}%`;
+    const v = $("verdict"), s = c.skill;
+    if (isNaN(s)) { v.className = "verdict warn"; v.textContent = "答え合わせできる日が足りません。もっと長い期間の記録を入れてください。"; }
+    else if (s >= 0.1) { v.className = "verdict good"; v.textContent = `いつものやり方より、外れが${Math.round(s * 100)}%少なくなりました。`; }
+    else if (s >= 0) { v.className = "verdict warn"; v.textContent = "いつものやり方と、ほぼ同じくらいの当たり方です。"; }
+    else { v.className = "verdict bad"; v.textContent = "いつものやり方の方がよく当たっています。このままでは使わないでください。"; }
+    // 合わせ込みすぎの見張り
+    const d = st.defaultRes, note = $("fitNote");
+    if (d && d !== r) {
+      const tGain = r.tune.skill - d.tune.skill, cGain = r.check.skill - d.check.skill;
+      note.hidden = false;
+      if (tGain > 0.01 && cGain < -0.01) { note.className = "notice warn"; note.textContent = `⚠ 練習期間では良くなりましたが、本番期間では悪くなりました。過去にだけ合う設定になっている可能性があります。「最初の設定に戻す」をおすすめします。`; }
+      else if (tGain > 0.01 && cGain >= -0.01) { note.className = "notice good"; note.textContent = `✓ 設定を変えた効果が、本番期間でも保てています。`; }
+      else { note.className = "notice"; note.textContent = `最初の設定と比べて、本番期間で ${cGain >= 0 ? "+" : ""}${Math.round(cGain * 100)}点。`; }
+    } else note.hidden = true;
+    // 怪しい列
+    // 予想したい数とそっくりな「前もって分かる」列は、売上のような後から分かる数の取り違えを疑う。
+    // ただし先の日にも数が入っている列(出勤予定の人数・予約数など)は、本当に前もって分かっているので疑わない
+    const yT = st.S.data[st.target]; let lastT = yT.length - 1; while (lastT > 0 && isNaN(yT[lastT])) lastT--;
+    const sus = E.suspicious(st.S, st.target, cfgFromUI().known).filter((c) => !st.S.data[c].slice(lastT + 1).some((v) => !isNaN(v)));
+    $("susNote").hidden = !sus.length;
+    if (sus.length) $("susNote").textContent = `⚠「${sus.join("・")}」は、予想したい数とほとんど同じ動きをしています。その日が終わってから分かる数(売上など)なら「終わってから分かる」にしてください。そのままだと、実際より当たるように見えてしまいます。`;
+    renderFileCheck(); renderAhead(); renderStaff(); renderLoss(); renderBars(); drawChart();
+  }
+
+  // ---- 必要な人数
+  function guessMode() {
+    const n = st.target || "", g = guessRaw(n);
+    return [...$("staffMode").options].some((o) => o.value === g) ? g : $("staffMode").options[0].value;
+  }
+  function guessRaw(n) {
+    return /出荷|入荷|物量|個口|ピッキング/.test(n) ? "wh" : /架電|発信/.test(n) ? "out" : /入電|着信|電話|コール|呼/.test(n) ? "in" : /客|来店/.test(n) ? "shop" : "none";
+  }
+  function fillStaffCols() {
+    const opts = (re) => { const cs = st.numeric.filter((c) => c !== st.target); const pick = cs.find((c) => re.test(c)) || cs[0] || ""; return [cs, pick]; };
+    const others = st.numeric.filter((c) => c !== st.target);
+    const fill = (id, re, allowNone) => {
+      if (!$(id)) return;
+      const pick = others.find((c) => re.test(c)) || (allowNone ? "" : others[0] || "");
+      $(id).innerHTML = (allowNone ? `<option value="">(使わない)</option>` : others.length ? "" : `<option value="">(列がありません)</option>`) + others.map((c) => `<option ${c === pick ? "selected" : ""}>${esc(c)}</option>`).join("");
+    };
+    fill("outStaff", /出勤|シフト|人数/); fill("outHoursCol", /稼働|時間/); fill("whInCol", /入荷|入庫|インバウンド/, true);
+  }
+  const num = (id) => parseFloat($(id).value);
+  // 物流の工程(会社ごとに分け方が違うので、名前・出荷側か入荷側か・処理件数をユーザーが編集する)
+  const WH_DEFAULT = [["ピッキング", "out", 80], ["梱包", "out", 60], ["出荷", "out", 150], ["入荷", "in", 60]];
+  function stepRow(name, side, rate) {
+    const d = document.createElement("div"); d.className = "step-row";
+    d.innerHTML = `<input type="text" value="${esc(name)}" aria-label="工程の名前"><select aria-label="出荷側か入荷側か"><option value="out" ${side === "out" ? "selected" : ""}>出荷側</option><option value="in" ${side === "in" ? "selected" : ""}>入荷側</option></select><span class="num-in"><input type="number" min="0.1" step="0.1" value="${rate}" aria-label="1人1時間あたりの処理件数">件/時</span><button type="button">消す</button>`;
+    d.querySelectorAll("input, select").forEach((el) => el.addEventListener("input", renderStaff));
+    d.querySelector("button").addEventListener("click", () => { d.remove(); renderStaff(); saveSettings(); });
+    return d;
+  }
+  function readSteps() {
+    return [...document.querySelectorAll("#whSteps .step-row")].map((r) => {
+      const [n, sel, rt] = [r.querySelector("input[type=text]"), r.querySelector("select"), r.querySelector("input[type=number]")];
+      return { name: n.value.trim() || "工程", side: sel.value, rate: parseFloat(rt.value) };
+    });
+  }
+  if ($("whSteps")) {
+    for (const s of WH_DEFAULT) $("whSteps").appendChild(stepRow(...s));
+    $("whAdd").addEventListener("click", () => { const r = stepRow("新しい工程", "out", 50); $("whSteps").appendChild(r); r.querySelector("input").select(); renderStaff(); saveSettings(); });
+  }
+  function renderStaff() {
+    renderStaffTable();
+    const mode = $("staffMode").value, v = (id) => $(id)?.value;
+    $("staffFold").hidden = mode === "none";
+    $("staffFoldSum").textContent = mode === "shop" ? `1人で1日${v("shopCap")}人まで ・ 最低${v("shopMin")}人`
+      : mode === "in" ? `1件${v("inAht")}秒 ・ 受付${v("inHours")}時間 ・ ${v("inSlSec")}秒以内に${v("inSlPct")}% ・ 出られない割合${v("inShrink")}%`
+      : mode === "wh" ? readSteps().map((s) => `${s.name}${s.rate}件/時`).join(" ・ ") + ` ・ 1人${v("whHours")}時間`
+      : mode === "out" ? `目標${Number(v("outGoal")).toLocaleString()}${v("outGoalType") === "hours" ? "時間" : "件"} ・ 欠勤率${v("outAbsent")}% ・ 1人${v("outHours")}時間 ・ 1時間に${v("outRate")}件` : "";
+    if (!$("staffErr").hidden) $("staffFold").open = true; // 直す場所が見えるように
+  }
+  function renderStaffTable() {
+    const mode = $("staffMode").value, tbl = $("staffTbl"), note = $("staffNote"), err = $("staffErr");
+    for (const [k, id] of [["shop", "staffShop"], ["in", "staffIn"], ["out", "staffOut"], ["wh", "staffWh"]]) if ($(id)) $(id).hidden = mode !== k;
+    err.hidden = true; tbl.innerHTML = ""; note.textContent = ""; $("staffSum").innerHTML = "";
+    if (mode === "none" || !st.ahead.length) { if (mode !== "none") note.textContent = "先の日付の行がないので、人数を出せません。"; return; }
+    if (mode === "shop") {
+      const cap = num("shopCap"), mn = num("shopMin") || 0;
+      if (!(cap > 0)) { err.hidden = false; err.textContent = "1人が対応できる数を入れてください。"; return; }
+      tbl.innerHTML = `<thead><tr><th>日付</th><th>予想${esc(st.target)}</th><th>必要な人数</th></tr></thead><tbody>` + st.ahead.map((a) => {
+        const v = Math.max(0, Math.round(a.value));
+        return `<tr><td>${fmtMD(a.t)}</td><td>${v}</td><td class="key">${Math.max(mn, Math.ceil(v / cap))}人</td></tr>`;
+      }).join("") + "</tbody>";
+      note.textContent = `予想の数を「1人が対応できる数」で割って切り上げ、最低人数より少なければ最低人数にしています。`;
+    } else if (mode === "wh") {
+      const steps = readSteps(), hrs = num("whHours"), shr = num("whShrink") || 0, inCol = $("whInCol").value;
+      if (!steps.length) { err.hidden = false; err.textContent = "工程を1つ以上足してください。"; return; }
+      if (!(steps.every((s) => s.rate > 0) && hrs > 0 && shr < 100)) { err.hidden = false; err.textContent = "処理件数と作業時間を見直してください(0より大きい数)。"; return; }
+      const per = hrs * (1 - shr / 100);
+      // 入荷は別の列として予想する(先の日に入荷予定の数が入っていれば、それを使う)
+      let inMap = new Map();
+      if (inCol) {
+        const c = cfgFromUI();
+        const cIn = { ...c, known: c.known.filter((x) => x !== inCol), past: [] };
+        for (const a of E.forecastAhead(st.S, inCol, cIn, 14)) inMap.set(a.t, { v: a.value, plan: false });
+        for (const a of st.ahead) { const v = st.S.data[inCol][idxOf(a.t)]; if (!isNaN(v)) inMap.set(a.t, { v, plan: true }); }
+      }
+      const hasIn = steps.some((s) => s.side === "in");
+      tbl.innerHTML = `<thead><tr><th>日付</th><th>予想${esc(st.target)}</th>${hasIn ? `<th>予想${inCol ? esc(inCol) : "入荷"}</th>` : ""}${steps.map((s) => `<th>${esc(s.name)}</th>`).join("")}<th>合計の人数</th></tr></thead><tbody>` + st.ahead.map((a) => {
+        const v = Math.max(0, Math.round(a.value));
+        const g = inCol ? inMap.get(a.t) : null, vi = g ? Math.max(0, Math.round(g.v)) : NaN;
+        const ns = steps.map((s) => { const vol = s.side === "in" ? vi : v; return isNaN(vol) ? NaN : Math.ceil(vol / (s.rate * per)); });
+        const total = ns.reduce((x, n) => x + (isNaN(n) ? 0 : n), 0);
+        return `<tr><td>${fmtMD(a.t)}</td><td>${v}</td>${hasIn ? `<td>${isNaN(vi) ? "–" : vi + (g.plan ? "(予定)" : "")}</td>` : ""}${ns.map((n) => `<td>${isNaN(n) ? "–" : n + "人"}</td>`).join("")}<td class="key">${total}人</td></tr>`;
+      }).join("") + "</tbody>";
+      if (hasIn && !inCol) { err.hidden = false; err.textContent = "入荷側の工程があります。「入荷件数の列」を選ぶと、その工程の人数も出せます。"; }
+      note.textContent = `工程ごとに専任の担当がいるとして、工程ごとの処理件数で人数を出し、最後に合計しています。出荷側の工程は予想出荷件数、入荷側の工程は予想入荷件数をもとにしています。どれも、件数 ÷(1時間あたりの処理件数 × 作業時間 × 休憩などを除いた割合)を切り上げた人数です。` + (inCol ? `入荷の数がファイルの先の日に入っていれば(入荷予定)、予想ではなくその数を使います。` : "");
+    } else if (mode === "in") {
+      const aht = num("inAht"), hrs = num("inHours"), sls = num("inSlSec"), slp = num("inSlPct"), shr = num("inShrink") || 0;
+      if (!(aht > 0 && hrs > 0 && sls > 0 && slp > 0 && slp < 100 && shr < 100)) { err.hidden = false; err.textContent = "入力した数字を見直してください。"; return; }
+      tbl.innerHTML = `<thead><tr><th>日付</th><th>予想${esc(st.target)}</th><th>同時に電話に出ている人数</th><th>必要なシフト人数</th></tr></thead><tbody>` + st.ahead.map((a) => {
+        const v = Math.max(0, Math.round(a.value)), r = E.erlangStaff(v, aht, hrs, slp, sls, shr);
+        return `<tr><td>${fmtMD(a.t)}</td><td>${v}</td><td>${isNaN(r.agents) ? "–" : r.agents + "人"}</td><td class="key">${isNaN(r.staff) ? "–" : r.staff + "人"}</td></tr>`;
+      }).join("") + "</tbody>";
+      note.textContent = `コールセンターで広く使われる計算(アーランC)で出しています。1日の電話が受付時間の中で均等に来るとした目安です。朝や昼など混む時間帯がある場合、その時間はこれより多く必要です。`;
+    } else {
+      const sc = $("outStaff").value, type = $("outGoalType").value, goal = num("outGoal"), ab = (num("outAbsent") || 0) / 100, hpp = num("outHours"), rate = num("outRate");
+      const hc = $("outHoursCol").value, unitG = type === "hours" ? "時間" : "件";
+      $("outHoursColF").hidden = type !== "hours"; $("outGoalUnit").textContent = unitG;
+      const fail = (m) => { err.hidden = false; err.textContent = m; };
+      if (!sc) return fail("出勤人数の列を選んでください。");
+      if (st.roles[sc] !== "known") return fail(`「1 データを選ぶ」で、「${sc}」を「前もって分かる」にしてください。予定の人数から見込みを出すためです。`);
+      if (type === "hours" && (!hc || hc === sc)) return fail("稼働時間の列を選んでください。");
+      if (!(goal > 0 && hpp > 0 && ab < 1 && (type === "hours" || rate > 0))) return fail("入力した数字を見直してください。");
+      const D = st.S.days, y = st.S.data[st.target];
+      let last = y.length - 1; while (last > 0 && isNaN(y[last])) last--;
+      const fut0 = last + 1, m0 = new Date(D[fut0]);
+      const inMonth = (i) => { const d = new Date(D[i]); return d.getUTCFullYear() === m0.getUTCFullYear() && d.getUTCMonth() === m0.getUTCMonth(); };
+      const futIdx = []; for (let i = fut0; i < D.length && inMonth(i); i++) futIdx.push(i);
+      const monthEnd = Date.UTC(m0.getUTCFullYear(), m0.getUTCMonth() + 1, 0);
+      const noPlan = Math.round((monthEnd - D[futIdx[futIdx.length - 1]]) / E.DAY);
+      const actCol = type === "hours" ? hc : st.target;
+      let done = 0, doneFrom = null; for (let i = 0; i < fut0; i++) if (inMonth(i) && !isNaN(st.S.data[actCol][i])) { done += st.S.data[actCol][i]; doneFrom ??= D[i]; }
+      let rows;
+      if (type === "calls") {
+        const wi = E.whatIfAhead(st.S, st.target, cfgFromUI(), sc, (i) => { const v = st.S.data[sc][i] * (1 - ab); return [v, v + 1]; }, futIdx.length);
+        rows = wi.map((w) => { const plan = st.S.data[sc][w.idx], open = plan > 0; return { t: w.t, plan, eff: plan * (1 - ab), a: open ? Math.max(0, w.preds[0]) : 0, b: open ? plan * (1 - ab) * hpp * rate : 0, slope: open ? Math.max(0, w.preds[1] - w.preds[0]) : 0 }; });
+      } else rows = futIdx.map((i) => { const plan = st.S.data[sc][i], open = plan > 0; return { t: D[i], plan, eff: plan * (1 - ab), a: open ? plan * (1 - ab) * hpp : 0, slope: open ? hpp : 0 }; });
+      const sum = (k) => rows.reduce((s, r) => s + (isNaN(r[k]) ? 0 : r[k]), 0);
+      const land = done + sum("a"), gap = goal - land, openDays = rows.filter((r) => r.plan > 0).length, slope = sum("slope");
+      const mName = `${m0.getUTCMonth() + 1}月`, f = (v) => Math.round(v).toLocaleString();
+      let html = `<p class="verdict ${gap <= 0 ? "good" : "bad"}">${mName}の着地見込み 約${f(land)}${unitG}(目標${f(goal)}${unitG}の${Math.round((land / goal) * 100)}%)</p>`;
+      html += `<p class="say">ここまでの実績 ${f(done)}${unitG}${doneFrom ? `(${fmtMD(doneFrom)}〜${fmtMD(D[last])})` : ""} + 残り${openDays}営業日の見込み ${f(sum("a"))}${unitG}。予定の人数から欠勤率${Math.round(ab * 1000) / 10}%を差し引いて計算しています。</p>`;
+      if (gap > 0) {
+        const extra = slope > 0 ? Math.ceil(gap / (slope * (1 - ab))) : NaN; // slope は残りの営業日ぶんの合計なので、1日あたりの追加人数になる
+        html += `<p class="notice warn">今のペースだと、あと約${f(gap)}${unitG}足りません。` + (isNaN(extra) ? "" : `残りの営業日に、1日あたり予定をあと約${extra}人増やすと届く計算です(欠勤率込み)。`) + `</p>`;
+      } else html += `<p class="notice good">今のペースなら届く見込みです(約${f(-gap)}${unitG}の余裕)。</p>`;
+      if (type === "calls") html += `<p class="small">「平均架電数から」計算すると、着地見込みは約${f(done + sum("b"))}件(${Math.round(((done + sum("b")) / goal) * 100)}%)です。2つが大きく違うときは、平均架電数の数字か、新人の比率を見直すきっかけになります。</p>`;
+      $("staffSum").innerHTML = html;
+      tbl.innerHTML = `<thead><tr><th>日付</th><th>予定の人数</th><th>欠勤を引くと</th><th>見込み${type === "calls" ? "(記録から)" : ""}</th>${type === "calls" ? "<th>見込み(平均架電数から)</th>" : ""}</tr></thead><tbody>` + rows.map((r) =>
+        r.plan === 0 ? `<tr><td>${fmtMD(r.t)}</td><td class="off" colspan="${type === "calls" ? 4 : 3}" style="text-align:left">休み</td></tr>`
+          : `<tr><td>${fmtMD(r.t)}</td><td>${isNaN(r.plan) ? "空欄" : r.plan + "人"}</td><td>${isNaN(r.eff) ? "–" : (Math.round(r.eff * 10) / 10) + "人"}</td><td class="key">${f(r.a)}${unitG}</td>${type === "calls" ? `<td>${f(r.b)}件</td>` : ""}</tr>`).join("") + "</tbody>";
+      note.textContent = (type === "calls" ? `「記録から」は、過去の記録から「出勤が1人増えると架電数がどれくらい増えるか」を学んで出した見込みです。新人の人数などほかの列は予定どおりのまま計算しています。` : `稼働時間の見込みは、欠勤を引いた人数 × 1人1日の稼働時間です。`) + (noPlan > 0 ? `月末までの${noPlan}日分は予定の行がないので、0として計算しています。` : "");
+    }
+  }
+  // ---- 食品ロス(飲食だけ): 予想で仕込んだら余り・不足はどうだったかを、いつものやり方(先週の同じ曜日)と比べる
+  function renderLoss() {
+    if (!$("lossSum")) return;
+    const menus = [...document.querySelectorAll("#menus .menu-row")].map((r) => { const [n, p, c] = r.querySelectorAll("input"); return { name: n.value.trim() || "メニュー", rate: (parseFloat(p.value) || 0) / 100, cost: parseFloat(c.value) || 0 }; }).filter((m) => m.rate > 0);
+    $("lossFoldSum").textContent = menus.map((m) => `${m.name}${Math.round(m.rate * 100)}%`).join(" ・ ") + ` ・ 上乗せ${num("lossMargin") || 0}%`;
+    const mg = (num("lossMargin") || 0) / 100, R = menus.reduce((s, m) => s + m.rate, 0), CPC = menus.reduce((s, m) => s + m.rate * m.cost, 0);
+    if (!menus.length) { $("lossSum").innerHTML = `<p class="notice warn">メニューの割合を1つ以上入れてください。</p>`; $("prepTbl").innerHTML = ""; return; }
+    const y = st.S.data[st.target], p = st.res.wf.pred, P = periods();
+    const acc = { t: { over: 0, short: 0 }, b: { over: 0, short: 0 } }; let n = 0;
+    st.S.days.forEach((t, i) => {
+      if (t < P.check[0] || t > P.check[1] || i < 7 || isNaN(y[i]) || isNaN(p[i]) || isNaN(y[i - 7])) return;
+      n++;
+      for (const [k, f] of [["t", p[i]], ["b", y[i - 7]]]) { const prep = Math.max(0, f) * (1 + mg); acc[k].over += Math.max(0, prep - y[i]); acc[k].short += Math.max(0, y[i] - prep); }
+    });
+    const f = (v) => Math.round(v).toLocaleString(), yr = n ? 365 / n : 0;
+    const box = (k, title, cls) => `<div class="box ${cls}"><span>${title}</span><span class="big2">余り 約${f(acc[k].over * R)}食</span><span>原価にして約${f(acc[k].over * CPC)}円 ・ 足りない 約${f(acc[k].short * R)}食</span></div>`;
+    let html = n ? `<p class="say">${fmtDate(P.check[0])}〜${fmtDate(P.check[1])}(${n}日)に、上乗せ${Math.round(mg * 100)}%で仕込んでいたら</p><div class="pair">${box("t", "このツールの予想で仕込んだ場合", "ours")}${box("b", "いつものやり方(先週の同じ曜日)で仕込んだ場合", "")}</div>` : `<p class="notice warn">答え合わせできる日が足りません。</p>`;
+    if (n) {
+      const dOver = (acc.b.over - acc.t.over) * R * yr, dYen = (acc.b.over - acc.t.over) * CPC * yr;
+      html += dOver > 0 ? `<p class="verdict good">1年に直すと、余る食事が約${f(dOver)}食、原価にして約${f(dYen)}円減る計算です。</p>` : `<p class="verdict warn">この期間では、いつものやり方より余りが減りませんでした。上乗せの割合を見直してください。</p>`;
+    }
+    $("lossSum").innerHTML = html;
+    $("prepTbl").innerHTML = `<thead><tr><th>日付</th><th>予想${esc(st.target)}</th>${menus.map((m) => `<th>${esc(m.name)}</th>`).join("")}</tr></thead><tbody>` + st.ahead.map((a) => {
+      const v = Math.max(0, a.value);
+      return `<tr><td>${fmtMD(a.t)}</td><td>${Math.round(v)}</td>${menus.map((m) => `<td class="key">${Math.ceil(v * m.rate * (1 + mg))}食</td>`).join("")}</tr>`;
+    }).join("") + "</tbody>";
+    $("lossNote").textContent = `仕込み量の目安 = 予想${st.target} × 頼む割合 × (1+上乗せ)。上乗せを増やすと品切れは減り、余りは増えます。メニューごとの注文数がファイルにあれば、「予想したい数」でそのメニューを選ぶと、より正確な仕込み量になります。`;
+  }
+  function renderAhead() {
+    const u = unit();
+    if (!st.ahead.length) {
+      $("hero").innerHTML = `<span class="when">まだ予想を出せません</span><span class="small">ファイルの最後に、予想したい日の日付だけの行(予約数・天気予報などがあれば一緒に)を足すと、ここに予想が出ます。</span>`;
+      $("days").innerHTML = ""; $("daysNote").textContent = ""; return;
+    }
+    const a0 = st.ahead.find((a) => !isClosed(a)) || st.ahead[0], d0 = new Date(a0.t);
+    $("hero").innerHTML = `<span class="when">${fmtDate(a0.t)}(${WD[d0.getUTCDay()]})の${esc(st.target)}は</span><span class="num">約${Math.max(0, Math.round(a0.value))}<small>${u}</small></span>`;
+    $("days").innerHTML = st.ahead.map((a) => {
+      const d = new Date(a.t), w = d.getUTCDay();
+      const miss = a.missingKnown.length ? `<span class="miss">${esc(a.missingKnown.join("・"))}が空欄</span>` : "";
+      const v = isClosed(a) ? `<span class="v off" style="font-size:17px;color:var(--muted)">休み</span>` : `<span class="v">${Math.max(0, Math.round(a.value))}</span>`;
+      return `<div class="day"><span class="d">${d.getUTCMonth() + 1}/${d.getUTCDate()}</span><span class="w ${w === 6 ? "sat" : w === 0 ? "sun" : ""}">${WD[w]}</span>${v}${miss}</div>`;
+    }).join("");
+    const anyMiss = st.ahead.some((a) => a.missingKnown.length);
+    $("daysNote").textContent = `単位: ${u || "そのまま"}。` + (anyMiss ? "「空欄」と出ている日は、予約数・天気予報などをファイルに足すと予想がより正確になります。" : "");
+  }
+  function renderBars() {
+    const F = st.res.wf.F, imp = st.res.wf.importance;
+    if (!imp) { $("bars").innerHTML = ""; return; }
+    const top = F.names.map((n, i) => [n, imp[i]]).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    const mx = top[0][1] || 1;
+    $("bars").innerHTML = top.map(([n, v]) => `<div class="bar"><span title="${esc(n)}">${esc(n)}</span><div style="width:${Math.max(3, (v / mx) * 100)}%"></div></div>`).join("");
+  }
+
+  // ---- グラフ
+  function drawChart() {
+    const cv = $("chart"), ctx = cv.getContext("2d");
+    const css = getComputedStyle(document.documentElement);
+    const col = (n) => css.getPropertyValue(n).trim();
+    const dpr = window.devicePixelRatio || 1;
+    const W = cv.clientWidth, H = cv.clientHeight;
+    cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    const S = st.S, y = S.data[st.target], p = st.res.wf.pred, P = periods();
+    let end = S.days.length - 1; while (end > 0 && isNaN(y[end]) && isNaN(p[end])) end--;
+    const tuneIdx = S.days.findIndex((t) => t >= Math.min(P.tune[0], P.check[0]));
+    let start = st.range === "all" ? Math.max(0, tuneIdx) : Math.max(0, end - +st.range + 1);
+    const idx = []; for (let i = start; i <= end; i++) idx.push(i);
+    const vals = idx.flatMap((i) => [y[i], p[i]]).filter((v) => !isNaN(v));
+    if (!vals.length) return;
+    let lo = Math.min(...vals), hi = Math.max(...vals);
+    const pad = (hi - lo) * 0.08 || 1; lo = Math.max(0, lo - pad); hi += pad;
+    const L = 48, R = 10, T = 10, B = 28;
+    const x = (k) => L + (k / Math.max(1, idx.length - 1)) * (W - L - R);
+    const yy = (v) => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
+    const band = (from, to, fill) => {
+      const a = idx.findIndex((i) => S.days[i] >= from), bRaw = idx.findLastIndex((i) => S.days[i] <= to);
+      if (a < 0 || bRaw < 0 || bRaw < a) return;
+      ctx.fillStyle = fill; ctx.fillRect(x(a), T, x(bRaw) - x(a) + 1, H - T - B);
+    };
+    band(...P.tune, col("--tune-bg")); band(...P.check, col("--check-bg"));
+    ctx.strokeStyle = col("--line"); ctx.fillStyle = col("--muted"); ctx.lineWidth = 1;
+    ctx.font = `13px ${col("--font-body")}`; ctx.textAlign = "right"; ctx.textBaseline = "middle";
+    const step = niceStep((hi - lo) / 4);
+    for (let v = Math.ceil(lo / step) * step; v <= hi; v += step) {
+      ctx.beginPath(); ctx.moveTo(L, yy(v)); ctx.lineTo(W - R, yy(v)); ctx.stroke();
+      ctx.fillText(String(Math.round(v * 100) / 100), L - 6, yy(v));
+    }
+    ctx.textAlign = "center"; ctx.textBaseline = "top";
+    let lastM = -1;
+    idx.forEach((i, k) => {
+      const d = new Date(S.days[i]);
+      if (d.getUTCDate() === 1 && d.getUTCMonth() !== lastM) {
+        lastM = d.getUTCMonth();
+        if (idx.length > 400 && d.getUTCMonth() % 3) return;
+        ctx.fillText(`${d.getUTCMonth() + 1}月`, x(k), H - B + 6);
+      }
+    });
+    const line = (arr, color, w) => {
+      ctx.strokeStyle = color; ctx.lineWidth = w; ctx.beginPath(); let on = false;
+      idx.forEach((i, k) => { const v = arr[i]; if (isNaN(v)) { on = false; return; } if (!on) { ctx.moveTo(x(k), yy(v)); on = true; } else ctx.lineTo(x(k), yy(v)); });
+      ctx.stroke();
+    };
+    line(y, col("--actual"), 1.6);
+    line(p, col("--accent"), 2.4);
+    const ah = st.ahead;
+    if (ah.length) {
+      ctx.fillStyle = col("--accent");
+      ah.forEach((a) => {
+        const k = idx.length - 1 + Math.round((a.t - S.days[end]) / E.DAY);
+        if (k < idx.length) { ctx.beginPath(); ctx.arc(x(k), yy(a.value), 3.5, 0, 7); ctx.fill(); }
+      });
+    }
+  }
+  function niceStep(r) { const p = Math.pow(10, Math.floor(Math.log10(r || 1))); const m = r / p; return (m < 1.5 ? 1 : m < 3 ? 2 : m < 7 ? 5 : 10) * p; }
+
+  // ---- イベント
+  $("horizon").addEventListener("input", (e) => { st.ui.horizon = +e.target.value; st.ui.lags = st.ui.lags.filter((L) => L >= st.ui.horizon); if (!st.ui.lags.length) st.ui.lags = LAGS.filter((L) => L >= st.ui.horizon).slice(0, 2); st.defaultRes = null; schedule(); });
+  $("window").addEventListener("input", (e) => { st.ui.window = +e.target.value; schedule(); });
+  $("trainDays").addEventListener("input", (e) => { st.ui.trainIdx = +e.target.value; schedule(); });
+  $("alpha").addEventListener("input", (e) => { st.ui.alphaIdx = +e.target.value; schedule(); });
+  for (const k of ["useDow", "useDom", "useMonth", "useHoliday", "logTarget"]) $(k).addEventListener("change", (e) => { st.ui[k] = e.target.checked; schedule(); });
+  for (const k of ["tuneFrom", "tuneTo", "checkFrom", "checkTo"]) $(k).addEventListener("change", () => { st.defaultRes = null; schedule(); });
+  $("targetSel").addEventListener("change", (e) => {
+    st.target = e.target.value; st.roles = {};
+    for (const c of st.numeric) if (c !== st.target) st.roles[c] = "off";
+    renderColumns(); fillStaffCols(); $("staffMode").value = guessMode(); setDefaultPeriods(); st.defaultRes = null; schedule();
+  });
+  document.querySelectorAll(".ranges button").forEach((b) => b.addEventListener("click", () => {
+    st.range = b.dataset.range;
+    document.querySelectorAll(".ranges button").forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+    drawChart();
+  }));
+  $("defaultBtn").addEventListener("click", () => { st.ui = { ...DEFAULT, lags: [...DEFAULT.lags] }; $("actionNote").hidden = true; schedule(); });
+  const busy = (btn, on, html) => { btn.disabled = on; if (html) btn.innerHTML = html; };
+  const AUTO_HTML = $("autoBtn").innerHTML, LEAK_HTML = $("leakBtn").innerHTML;
+  const leakNote = () => $("leakNote");
+  $("autoBtn").addEventListener("click", () => {
+    const btn = $("autoBtn"); busy(btn, true, "試しています…<span>少しお待ちください</span>");
+    setTimeout(() => {
+      const t = E.autoTune(st.S, st.target, cfgFromUI(), periods());
+      const c = t.cfg;
+      st.ui.lags = c.lags.filter((L) => L >= st.ui.horizon); st.ui.window = c.window;
+      st.ui.trainIdx = Math.max(0, TRAIN.indexOf(c.trainDays)); st.ui.alphaIdx = Math.max(0, ALPHA.indexOf(c.alpha)); st.ui.logTarget = c.logTarget;
+      syncUI(); run(false);
+      $("actionNote").className = "notice"; $("actionNote").hidden = false;
+      $("actionNote").textContent = `${t.tried}通りの設定を試して、一番よく当たったものにしました。上の「外れ方」が小さくなったか見てください(試したのは練習期間だけで、本番期間は設定選びに使っていません)。`;
+      busy(btn, false, AUTO_HTML);
+    }, 30);
+  });
+  $("leakBtn").addEventListener("click", () => {
+    const btn = $("leakBtn"); busy(btn, true, "検査しています…");
+    setTimeout(() => {
+      const r = E.leakTest(st.S, st.target, cfgFromUI(), periods());
+      const n = r.results.reduce((a, x) => a + x.checked, 0);
+      leakNote().hidden = false;
+      leakNote().className = "notice " + (r.ok ? "good" : "bad");
+      leakNote().textContent = r.ok
+        ? `✓ 合格です。ある日(${r.results.map((x) => x.cut).join("・")})より後の記録をでたらめな数に書き換えて計算し直しても、その日までの予想${n}件は1件も変わりませんでした。未来の答えを見ずに予想しています。`
+        : `✗ 不合格です。未来の記録を書き換えると予想が変わりました(最大の差 ${Math.max(...r.results.map((x) => x.maxDiff)).toFixed(2)})。列の使い方を見直してください。`;
+      busy(btn, false, LEAK_HTML);
+    }, 30);
+  });
+  $("fileIn").addEventListener("change", (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    const rd = new FileReader();
+    rd.onload = () => {
+      try {
+        loadRows(E.parseCSV(rd.result), `入れたファイル: ${f.name}`, null, true);
+        pressSample(null);
+        st.ui = { ...DEFAULT, lags: [...DEFAULT.lags] }; syncUI(); run(true);
+      } catch (err) { $("fileErr").textContent = err.message; $("fileErr").hidden = false; }
+    };
+    rd.readAsText(f);
+  });
+  function pressSample(kind) { document.querySelectorAll("[data-sample]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.sample === kind ? "true" : "false")); }
+  document.querySelectorAll("[data-sample]").forEach((b) => b.addEventListener("click", () => { $("fileIn").value = ""; start(b.dataset.sample); }));
+  if ($("outCalc")) $("outCalc").addEventListener("click", () => {
+    const s = (num("outPre") || 0) + (num("outTalk") || 0) + (num("outPost") || 0);
+    if (s > 0) { $("outRate").value = (3600 / s).toFixed(1); renderStaff(); saveSettings(); }
+  });
+  document.querySelectorAll("#menus input, #lossMargin").forEach((el) => el.addEventListener("input", renderLoss));
+  for (const id of ["whInCol", "outGoalType", "outAbsent", "outHoursCol", "whRate", "whHours", "whShrink", "outRate", "outHours", "outShrink", "shopCap", "shopMin", "inAht", "inHours", "inSlSec", "inSlPct", "inShrink", "outGoal", "outStaff"]) $(id)?.addEventListener("input", () => { renderStaff(); renderAhead(); });
+  let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(drawChart, 100); });
+  const mq = window.matchMedia("(prefers-color-scheme: dark)"); mq.addEventListener?.("change", drawChart);
+  new MutationObserver(drawChart).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+  // ---- 設定の保存(人数の計算・メニューの数字。このブラウザの中だけに置き、外には送らない)
+  const SAVE_KEY = "forecast-tool-v1-" + INDUSTRY;
+  const SAVE_IDS = ["shopCap", "shopMin", "inAht", "inHours", "inSlSec", "inSlPct", "inShrink", "whHours", "whShrink", "outGoalType", "outGoal", "outAbsent", "outHours", "outRate", "outPre", "outTalk", "outPost", "lossMargin"];
+  function collectSettings() {
+    const v = {};
+    for (const id of SAVE_IDS) if ($(id)) v[id] = $(id).value;
+    if ($("whSteps")) v.steps = [...document.querySelectorAll("#whSteps .step-row")].map((r) => [r.querySelector("input[type=text]").value, r.querySelector("select").value, r.querySelector("input[type=number]").value]);
+    if ($("menus")) v.menus = [...document.querySelectorAll("#menus .menu-row")].map((r) => [...r.querySelectorAll("input")].map((i) => i.value));
+    return v;
+  }
+  function applySettings(v) {
+    for (const id of SAVE_IDS) if ($(id) && v[id] != null) $(id).value = v[id];
+    if ($("whSteps") && Array.isArray(v.steps) && v.steps.length) { $("whSteps").innerHTML = ""; for (const s of v.steps) $("whSteps").appendChild(stepRow(...s)); }
+    if ($("menus") && Array.isArray(v.menus)) document.querySelectorAll("#menus .menu-row").forEach((r, i) => r.querySelectorAll("input").forEach((inp, j) => { if (v.menus[i]?.[j] != null) inp.value = v.menus[i][j]; }));
+  }
+  function saveSettings() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(collectSettings())); } catch (e) { /* 保存できないブラウザでも、そのまま使える */ } }
+  const FIRST = collectSettings();
+  try { const v = JSON.parse(localStorage.getItem(SAVE_KEY) || "null"); if (v) applySettings(v); } catch (e) { /* 保存がなければ最初の数字 */ }
+  for (const ev of ["input", "change"]) document.addEventListener(ev, (e) => { if (e.target.closest?.("#staffFold, #lossFold")) saveSettings(); });
+  $("forgetBtn").addEventListener("click", () => {
+    try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* なにもしない */ }
+    applySettings(FIRST); renderStaff(); renderLoss(); renderAhead();
+    $("forgetNote").hidden = false; $("forgetNote").textContent = "保存した数字を消して、最初の数字に戻しました。";
+  });
+
+  // ---- 結果の持ち出し(CSV・印刷)
+  // claude.ai の中で開いたときは、保存の確認を出すしくみ(downloads)を使う。ほかの場所ではふつうのダウンロード
+  const dlP = window.claude?.use ? window.claude.use("downloads").catch(() => null) : Promise.resolve(null);
+  async function saveFile(name, text, type) {
+    const blob = new Blob([text], { type });
+    const dl = await dlP;
+    if (dl) {
+      try { await dl.save({ filename: name, data: blob }); return "ok"; } catch (e) { return e?.code === "declined" ? "declined" : "fail"; }
+    }
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    return "ok";
+  }
+  // 画面の表(人数・仕込み量)を日付でつないで1つの表にする。「12人」のような単位は見出しに移し、数字だけにする(Excelで足し算できるように)
+  function exportTable() {
+    const y = st.S.data[st.target]; let last = y.length - 1; while (last > 0 && isNaN(y[last])) last--;
+    const byKey = new Map();
+    for (const t of [...st.S.days.slice(last + 1), ...st.ahead.map((a) => a.t)]) byKey.set(fmtMD(t), t);
+    const head = ["日付", "曜日", `予想${st.target}`], rows = new Map();
+    const rowOf = (t) => { if (!rows.has(t)) rows.set(t, { 日付: E.iso(t), 曜日: WD[new Date(t).getUTCDay()] }); return rows.get(t); };
+    for (const a of st.ahead) rowOf(a.t)[head[2]] = isClosed(a) ? "休み" : String(Math.max(0, Math.round(a.value)));
+    for (const tbl of [$("staffTbl"), $("prepTbl")]) {
+      if (!tbl || !tbl.rows.length) continue;
+      const hs = [...tbl.querySelectorAll("thead th")].map((th) => th.textContent.trim());
+      const body = [...tbl.querySelectorAll("tbody tr")].map((tr) => [...tr.cells].flatMap((td) => Array(td.colSpan || 1).fill(td.textContent.trim())));
+      hs.forEach((h, j) => {
+        if (j === 0 || head.includes(h)) return;
+        const unitM = body.map((r) => /^[\d,.]+(人|件|食|時間)$/.exec(r[j] || "")).find(Boolean), name = unitM ? `${h}(${unitM[1]})` : h;
+        if (head.includes(name)) return;
+        head.push(name);
+        for (const r of body) { const t = byKey.get(r[0]); if (t == null) continue; const m = /^([\d,.]+)(人|件|食|時間)$/.exec(r[j] || ""); rowOf(t)[name] = m ? m[1].replace(/,/g, "") : r[j]; }
+      });
+    }
+    return { head, rows: [...rows.entries()].sort((a, b) => a[0] - b[0]).map(([, r]) => head.map((h) => r[h] ?? "")) };
+  }
+  const csvCell = (v) => (/[",\n]/.test(v) ? `"${String(v).replace(/"/g, '""')}"` : v);
+  function exportMsg(r, okText) {
+    const n = $("exportNote");
+    n.hidden = false;
+    n.className = "notice " + (r === "ok" ? "good" : r === "declined" ? "" : "warn");
+    n.textContent = r === "ok" ? okText : r === "declined" ? "保存をやめました。" : "このページでは保存できませんでした。表を選んでコピーし、Excelに貼り付けてください。";
+  }
+  $("csvBtn").addEventListener("click", async () => {
+    const T = exportTable();
+    if (!T.rows.length) return exportMsg("fail");
+    const text = "\ufeff" + [T.head, ...T.rows].map((r) => r.map(csvCell).join(",")).join("\r\n") + "\r\n";
+    exportMsg(await saveFile(`来客予測ツール_${T.rows[0][0]}から.csv`, text, "text/csv"), `${T.rows.length}日分(${T.rows[0][0]}〜${T.rows[T.rows.length - 1][0]})をCSVにしました。`);
+  });
+  $("printBtn").addEventListener("click", async () => {
+    const dl = await dlP;
+    if (!dl) { window.print(); return; }
+    // claude.ai の中では印刷の画面を開けないので、印刷用のページを保存してもらい、それを開くと印刷の画面が出るようにする
+    const T = exportTable();
+    const html = `<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>来客予測ツール 印刷用</title><style>body{font-family:"Hiragino Sans","Yu Gothic","Meiryo",sans-serif;margin:24px;color:#000}h1{font-size:20px;margin:0 0 4px}p{margin:4px 0 12px;font-size:14px}table{border-collapse:collapse;font-size:13px}th,td{border:1px solid #888;padding:4px 8px;text-align:right}th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}th{background:#eee}</style></head><body><h1>来客予測ツール</h1><p>${esc($("dataName").textContent)} ・ ${E.iso(Date.now())}に出力</p>${$("staffSum").innerText ? `<p>${esc($("staffSum").innerText).replace(/\n+/g, "<br>")}</p>` : ""}<table><thead><tr>${T.head.map((h) => `<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>${T.rows.map((r) => `<tr>${r.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table><script>window.onload=function(){window.print()}<\/script></body></html>`;
+    exportMsg(await saveFile(`来客予測ツール_印刷用.html`, html, "text/html"), "印刷用のページを保存しました。保存したファイルを開くと、印刷の画面が出ます。");
+  });
+
+  function start(kind) {
+    st.ui = { ...DEFAULT, lags: [...DEFAULT.lags] }; syncUI();
+    pressSample(kind);
+    if (kind === "call") loadRows(E.sampleCallcenter(), "見本: コールセンターの受ける電話の数(2023〜2025年・作り物のデータ)", { キャンペーン中: "known", CM放送日: "known", DM発送の翌日: "known" });
+    else if (kind === "wh") loadRows(E.sampleLogistics(), "見本: 倉庫の出荷件数(2023〜2025年・作り物のデータ)", { セール: "known", セールの3日前まで: "known", 入荷件数: "off" });
+    else if (kind === "out") loadRows(E.sampleOutbound(), "見本: コールセンターのかける電話の数(2023年〜2026年1月14日・作り物のデータ)", { 出勤人数: "known", 新人の人数: "known", 稼働時間: "off" });
+    else loadRows(E.sampleRestaurant(), "見本: 飲食店の来客数(2023〜2025年・作り物のデータ)", { 予約数: "known", 雨予報: "known", 売上: "off" });
+  }
+  start(INDUSTRY === "restaurant" ? "rest" : INDUSTRY === "logistics" ? "wh" : location.hash === "#out" ? "out" : "call");
+})();
+</script>
+
+</body>
+</html>

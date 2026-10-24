@@ -63,7 +63,7 @@ export function WorkDetail() {
                   rel="noopener"
                   className="rounded-full bg-ink px-6 py-3 text-center text-sm font-medium text-paper transition-colors hover:bg-accent-deep"
                 >
-                  {work.category === 'book' ? '試し読みする' : 'アプリを開く'}
+                  {work.category === 'book' ? '試し読みする' : work.category === 'tool' ? '詳しく見る・試す' : 'アプリを開く'}
                 </a>
               )}
             </div>
