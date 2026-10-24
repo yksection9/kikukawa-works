@@ -14,8 +14,8 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 export function Privacy() {
   usePageTitle('プライバシーポリシー')
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-      <h1 className="font-serif text-2xl font-bold sm:text-3xl">プライバシーポリシー</h1>
+    <div className="mx-auto max-w-3xl px-4 pt-10 sm:px-8 md:pt-16">
+      <h1 className="text-[25px] leading-snug font-black sm:text-[39px]">プライバシーポリシー</h1>
       <div className="mt-8 space-y-8 leading-relaxed">
         <Section title="このサイトで扱う情報">
           <p>このサイト自体は、会員登録やフォームによる個人情報の入力を求めていません。</p>
@@ -41,7 +41,7 @@ export function Privacy() {
         <Section title="お問い合わせ">
           <p>
             本ポリシーに関するお問い合わせは{' '}
-            <a href={`mailto:${SELLER.email}`} className="text-accent hover:underline">{SELLER.email}</a>{' '}
+            <a href={`mailto:${SELLER.email}`} className="font-bold underline underline-offset-4">{SELLER.email}</a>{' '}
             までご連絡ください。
           </p>
         </Section>

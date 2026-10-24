@@ -14,6 +14,8 @@ export type Work = {
   url?: string
   /** Stripeの支払いリンク。サイトで直接販売する作品だけに設定する */
   buyUrl?: string
+  /** 作品の色(ボタンなどに使う)。白い文字が読める濃さにする。省略すると墨色 */
+  color?: string
 }
 
 export const CATEGORY_LABEL: Record<WorkCategory, string> = {
@@ -49,6 +51,7 @@ export const WORKS: Work[] = [
       { src: '/works/whisky/bar-empty.webp', alt: 'まだ何もないバーの部屋' },
     ],
     url: 'https://whisky.kikukawaworks.com',
+    color: '#8e5414',
   },
 ]
 

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
-import { WorkCard } from '../components/WorkCard'
-import { WORKS } from '../data/works'
+import { WorkRow } from '../components/WorkCard'
+import { CATEGORY_LABEL, WORKS } from '../data/works'
 import { usePageTitle } from '../usePageTitle'
 
 export function Home() {
@@ -9,52 +9,49 @@ export function Home() {
 
   return (
     <>
-      <section className="mx-auto grid max-w-5xl items-center gap-10 px-4 py-14 sm:px-6 md:grid-cols-2 md:py-20">
-        <div>
-          <p className="text-sm font-medium tracking-widest text-accent">APPS · TOOLS · BOOKS</p>
-          <h1 className="mt-4 font-serif text-3xl leading-snug font-bold sm:text-4xl">
+      <section className="mx-auto grid max-w-6xl items-center gap-12 px-4 pt-10 pb-16 sm:px-8 md:grid-cols-[5fr_6fr] md:gap-16 md:pt-16 md:pb-24">
+        <div className="rise">
+          <h1 className="text-[36px] leading-[1.35] font-black sm:text-[49px]">
             欲しいものを、
             <br />
             自分の手でつくる。
           </h1>
-          <p className="mt-6 leading-relaxed text-sub">
-            個人でつくっているアプリ、ツール、書籍を置いているお店です。
-            自分で使いたくて作ったものを、同じように欲しい人へ届けます。
+          <p className="mt-6 max-w-[34em] text-[16px] text-sub">
+            菊川雄士が個人でつくっているアプリ、ツール、書籍のお店です。自分で使いたくて作ったものを、同じように欲しい人へ届けます。
           </p>
-          <Link
-            to="/works"
-            className="mt-8 inline-block rounded-full bg-ink px-6 py-3 text-sm font-medium text-paper transition-colors hover:bg-accent-deep"
-          >
-            作品を見る
-          </Link>
+          <div className="mt-10">
+            <Link to="/works" className="btn btn-line">作品を見る</Link>
+          </div>
         </div>
-        <Link to={`/works/${featured.slug}`} className="group relative block">
-          <img
-            src={featured.images[0].src}
-            alt={featured.images[0].alt}
-            className="aspect-[4/5] w-full rounded-3xl object-cover shadow-xl transition-transform duration-500 group-hover:-rotate-1"
-          />
-          <span className="absolute bottom-4 left-4 rounded-full bg-card/90 px-4 py-2 text-sm font-medium backdrop-blur">
-            {featured.title}
-          </span>
-        </Link>
+
+        <figure className="rise md:pl-4" style={{ animationDelay: '0.15s' }}>
+          <Link to={`/works/${featured.slug}`} className="frame block">
+            <img
+              src={featured.images[0].src}
+              alt={featured.images[0].alt}
+              className="aspect-[4/5] w-full object-cover sm:aspect-[5/4]"
+            />
+          </Link>
+          <figcaption className="mt-6 ml-auto w-fit text-right text-[14px] leading-relaxed">
+            <span className="block text-[16px] font-black">{featured.title}</span>
+            <span className="text-sub">
+              {CATEGORY_LABEL[featured.category]}、{featured.price}
+            </span>
+          </figcaption>
+        </figure>
       </section>
 
-      <section className="border-t border-line bg-card/50">
-        <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6">
-          <div className="flex items-end justify-between">
-            <h2 className="font-serif text-2xl font-bold">作品</h2>
-            <Link to="/works" className="text-sm text-accent hover:underline">すべて見る</Link>
-          </div>
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {WORKS.map((w) => (
-              <WorkCard key={w.slug} work={w} />
-            ))}
-            <div className="flex min-h-48 items-center justify-center rounded-2xl border border-dashed border-line p-6 text-center text-sm text-sub">
-              新しい作品を準備しています
-            </div>
-          </div>
+      <section className="mx-auto max-w-6xl px-4 sm:px-8">
+        <div className="flex items-baseline justify-between border-b-2 border-ink pb-3">
+          <h2 className="text-[25px] font-black">作品目録</h2>
+          <p className="text-[14px] text-sub">{WORKS.length}点</p>
         </div>
+        <ul>
+          {WORKS.map((w) => (
+            <WorkRow key={w.slug} work={w} />
+          ))}
+        </ul>
+        <p className="py-6 text-[15px] text-sub">次の作品を準備しています。</p>
       </section>
     </>
   )
