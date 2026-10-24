@@ -25,6 +25,29 @@ export const CATEGORY_LABEL: Record<WorkCategory, string> = {
 // 作品を追加するときは、この配列に1件足して public/works/<slug>/ に画像を置く。
 export const WORKS: Work[] = [
   {
+    slug: 'forecast',
+    title: '予測ツール(ベータ版)',
+    category: 'tool',
+    tagline: '明日の数を、当たるか確かめてから予測する。',
+    description: [
+      '来客数・入電数など、日付と数字のCSVを入れるだけで予測するWebツールです。',
+      '過去の各時点で「その日までのデータだけ」で予測し直して成績を出すので、使う前に当たっていたかを確かめられます。計算はすべてブラウザの中で行い、データを外に送りません。',
+    ],
+    features: [
+      'CSVを入れるだけで予測と過去の成績を表示',
+      'ウォークフォワード検証と、未来の情報を使っていないことの検査',
+      'スライダーで調整し、すぐに検証をやり直す(調整しすぎは警告)',
+      '祝日・給料日・予約数・天気予報・キャンペーンなどを入れられる',
+      '飲食店の来客数、コールセンターの入電数の見本データつき',
+    ],
+    price: '無料(ベータ版)',
+    priceNote: '正式版は有料の予定です。紹介ページから無料予測も申し込めます',
+    images: [
+      { src: '/works/forecast/demo.webp', alt: '予測ツールの画面。実績と予測のグラフと、調整用のスライダー' },
+    ],
+    url: '/forecast',
+  },
+  {
     slug: 'whisky-collection',
     title: 'ウイスキーコレクション',
     category: 'app',
