@@ -54,7 +54,7 @@ const COPY: Record<Industry | 'all', {
     ],
     inputs: '曜日・祝日・月末や請求日の時期、DMやキャンペーンの実施日など、事前に分かる予定を使えます。',
     demo: DEMO_URL('callcenter'),
-    sample: { model: '約8%', base: '約21%', note: '見本の入電数データ(合成)で、2025年4月〜12月を予測した結果' },
+    sample: { model: '約12%', base: '約29%', note: '見本の入電数データ(合成)で、2025年4月〜12月を予測した結果' },
   },
   logistics: {
     label: '物流・倉庫',
@@ -67,6 +67,7 @@ const COPY: Record<Industry | 'all', {
     ],
     inputs: '曜日・祝日・月末のほか、セールやキャンペーンの日、入荷予定など、事前に分かる予定を使えます。',
     demo: DEMO_URL('logistics'),
+    sample: { model: '約7%', base: '約13%', note: '見本の出荷件数データ(合成)で、2025年4月〜12月を予測した結果' },
   },
 }
 
@@ -159,7 +160,7 @@ export function Forecast() {
             </div>
           </div>
           <p className="mt-3 text-sm text-sub">
-            数字は誤差(予測と実績の差の合計÷実績の合計)。{c.sample.note}です。実際のお店・センターでの成績ではありません。
+            数字は誤差(予測と実績の差の合計÷実績の合計)。{c.sample.note}です。実際のお店・センター・倉庫での成績ではありません。
             お手元のデータでどうなるかは、デモに入れて確かめられます。
           </p>
         </section>
