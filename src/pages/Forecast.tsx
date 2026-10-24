@@ -4,9 +4,10 @@ import { usePageTitle } from '../usePageTitle'
 import { NotFound } from './NotFound'
 
 // 予測ツール(ベータ版)の紹介ページ。中身は1つで、業種ごとに言葉と見本だけを変える。
-type Industry = 'restaurant' | 'callcenter'
+type Industry = 'restaurant' | 'callcenter' | 'logistics'
 
-const DEMO_URL = '/tools/forecast/'
+// デモは業種ごとに別の画面(public/tools/forecast/<業種>/)
+const DEMO_URL = (ind: Industry): string => `/tools/forecast/${ind}/`
 
 const COPY: Record<Industry | 'all', {
   label: string
@@ -27,7 +28,7 @@ const COPY: Record<Industry | 'all', {
       'Excelで予測しているが、どこまで信じてよいか分からない',
     ],
     inputs: '祝日・曜日・給料日のほか、予約数・天気予報・キャンペーンなど、事前に分かる情報を列として足せます。',
-    demo: DEMO_URL,
+    demo: DEMO_URL('restaurant'),
   },
   restaurant: {
     label: '飲食店',
@@ -39,7 +40,7 @@ const COPY: Record<Industry | 'all', {
       'シフトの人数を先週の同じ曜日の数字で決めている',
     ],
     inputs: '予約数(前日までに分かる数)、雨の予報、祝日・連休、給料日を使えます。',
-    demo: DEMO_URL,
+    demo: DEMO_URL('restaurant'),
     sample: { model: '約8%', base: '約16%', note: '見本の来客数データ(合成)で、2025年4月〜12月を予測した結果' },
   },
   callcenter: {
@@ -52,23 +53,36 @@ const COPY: Record<Industry | 'all', {
       '請求日やキャンペーンの後の増え方を、毎回手で見積もっている',
     ],
     inputs: '曜日・祝日・月末や請求日の時期、DMやキャンペーンの実施日など、事前に分かる予定を使えます。',
-    demo: `${DEMO_URL}#call`,
+    demo: DEMO_URL('callcenter'),
     sample: { model: '約8%', base: '約21%', note: '見本の入電数データ(合成)で、2025年4月〜12月を予測した結果' },
+  },
+  logistics: {
+    label: '物流・倉庫',
+    title: '明日の出荷件数と、要る作業人数を。',
+    lead: '日別の出荷件数のCSVを入れるだけで、この先1週間の件数と、必要な作業人数を予想します。セールや入荷の予定も入れられます。',
+    pains: [
+      '出荷の山の日に人が足りず、残業や応援でしのいでいる',
+      'セールや連休明けにどれだけ増えるか、毎回手で見積もっている',
+      'パートさんの出勤人数を、先週の同じ曜日の数字で決めている',
+    ],
+    inputs: '曜日・祝日・月末のほか、セールやキャンペーンの日、入荷予定など、事前に分かる予定を使えます。',
+    demo: DEMO_URL('logistics'),
   },
 }
 
 const FEATURES = [
   { title: 'CSVを入れるだけ', body: '日付の列と数字の列を自動で見つけて、すぐに予測と成績を出します。' },
-  { title: '昔から使っていたら当たったかが分かる', body: '過去の1日ずつについて、その日より前のデータだけで予測し直し、実際の数と比べます(ウォークフォワード検証)。' },
-  { title: '未来の情報を使っていない証明', body: '「未来リーク検査」ボタンで、未来の値をでたらめに書き換えても予測が変わらないことを、その場で確かめられます。' },
-  { title: 'スライダーで調整', body: '何日前の実績を見るか、何日分を平均するかなどを動かすと、すぐに検証がやり直されます。調整しすぎは警告します。' },
+  { title: '昔から使っていたら当たったかが分かる', body: '過去の1日ずつについて、その日より前のデータだけで予測し直し、実際の数と比べます。' },
+  { title: '必要な人数まで出る', body: '予想した数から、その日に要るスタッフ・オペレーター・作業者の人数を出します。1人で回せる数などは自分で変えられます。' },
+  { title: '詳しい設定で調整', body: '何日前の実績を見るか、何日分を平均するかなどを動かすと、すぐに当たり具合が計算し直されます。調整しすぎは警告します。' },
   { title: 'データを外に送らない', body: '計算はすべてお使いのブラウザの中で行います。CSVがこのサイトや他のサーバーに送られることはありません。' },
   { title: '事前に分かる情報を足せる', body: '予約数・天気予報・DMの発送日など、予測する時点で分かっている情報を列として加えられます。' },
 ]
 
 export function Forecast() {
   const { industry } = useParams()
-  const key: Industry | 'all' | null = industry === undefined ? 'all' : industry === 'restaurant' || industry === 'callcenter' ? industry : null
+  const key: Industry | 'all' | null =
+    industry === undefined ? 'all' : industry === 'restaurant' || industry === 'callcenter' || industry === 'logistics' ? industry : null
   const c = key ? COPY[key] : null
   usePageTitle(c ? (key === 'all' ? '予測ツール(ベータ版)' : `${c.label}の予測ツール(ベータ版)`) : undefined)
   if (!c || !key) return <NotFound />
@@ -83,15 +97,24 @@ export function Forecast() {
         <NavLink to="/forecast" end className={tab}>すべて</NavLink>
         <NavLink to="/forecast/restaurant" className={tab}>飲食店</NavLink>
         <NavLink to="/forecast/callcenter" className={tab}>コールセンター</NavLink>
+        <NavLink to="/forecast/logistics" className={tab}>物流・倉庫</NavLink>
       </nav>
 
       <p className="mt-8 text-sm font-medium tracking-wider text-accent">予測ツール ・ ベータ版(無料)</p>
       <h1 className="mt-2 font-serif text-3xl font-bold leading-snug text-balance sm:text-4xl">{c.title}</h1>
       <p className="mt-4 max-w-2xl text-lg leading-relaxed text-sub">{c.lead}</p>
       <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-        <a href={c.demo} className="rounded-full bg-ink px-6 py-3 text-center text-sm font-medium text-paper transition-colors hover:bg-accent-deep">
-          見本データで試す
-        </a>
+        {key === 'all' ? (
+          (['restaurant', 'callcenter', 'logistics'] as const).map((ind) => (
+            <a key={ind} href={DEMO_URL(ind)} className="rounded-full bg-ink px-6 py-3 text-center text-sm font-medium text-paper transition-colors hover:bg-accent-deep">
+              {COPY[ind].label}の見本で試す
+            </a>
+          ))
+        ) : (
+          <a href={c.demo} className="rounded-full bg-ink px-6 py-3 text-center text-sm font-medium text-paper transition-colors hover:bg-accent-deep">
+            見本データで試す
+          </a>
+        )}
         <a href="#apply" className="rounded-full border border-ink px-6 py-3 text-center text-sm font-medium transition-colors hover:border-accent hover:text-accent">
           無料予測を申し込む
         </a>
@@ -159,7 +182,7 @@ export function Forecast() {
           {[
             '日付と数字が並んだCSVを用意します(POSや電話のシステムから出せる形で大丈夫です)。',
             'デモの画面にCSVを入れると、予測と、過去の期間での成績がすぐに出ます。',
-            '必要ならスライダーで調整し、「確認期間」でも成績が保てているかを見てから使います。',
+            '必要なら詳しい設定で調整し、「本番期間」でも当たり具合が保てているかを見てから使います。',
           ].map((s, i) => (
             <li key={s} className="flex gap-3">
               <span className="font-serif text-lg font-bold text-accent tabular-nums">{i + 1}</span>
@@ -173,7 +196,7 @@ export function Forecast() {
         <h2 className="font-serif text-xl font-bold">無料予測の申し込み</h2>
         <div className="mt-3 space-y-3 leading-relaxed">
           <p>
-            あなたのお店・センターのデータで、1回無料で予測します(先着: 飲食店10店・コールセンター5社)。
+            あなたのお店・センター・倉庫のデータで、1回無料で予測します(先着: 飲食店10店・コールセンター5社・物流5社)。
             データを送っていただく必要はありません。画面を一緒に見ながら、お手元のブラウザで進めます。
           </p>
           <p>メールに、業種と、手元にあるデータのおおよその期間(例: 2024年4月から日別)を書いてお送りください。</p>
@@ -196,7 +219,7 @@ export function Forecast() {
         <p className="mt-4">
           <Link to="/works/forecast" className="text-accent hover:underline">作品ページ</Link>
           {' ・ '}
-          <a href={DEMO_URL} className="text-accent hover:underline">デモを開く</a>
+          <a href={c.demo} className="text-accent hover:underline">デモを開く</a>
         </p>
       </section>
     </div>
