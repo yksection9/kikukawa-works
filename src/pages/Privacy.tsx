@@ -32,6 +32,12 @@ export function Privacy() {
             <li>不具合の調査や作品の改善のため</li>
           </ul>
         </Section>
+        <Section title="アクセス解析">
+          <p>
+            サイトの利用状況(見られたページ、おおよその地域、どのサイトから来たか、端末の種類など)を知るため、Cloudflare Web Analytics を使っています。
+            クッキーは使わず、閲覧した方を個人として特定する情報は集めません。
+          </p>
+        </Section>
         <Section title="第三者への提供">
           <p>法令に基づく場合を除き、お預かりした情報をご本人の同意なく第三者に提供することはありません。</p>
         </Section>
@@ -49,7 +55,7 @@ export function Privacy() {
             までご連絡ください。
           </p>
         </Section>
-        <p className="text-sm text-sub">制定日: 2026年10月22日</p>
+        <p className="text-sm text-sub">制定日: 2026年10月22日 / 改定日: 2026年10月25日(アクセス解析を追加)</p>
       </div>
     </div>
   )
