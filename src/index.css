@@ -10,6 +10,19 @@
   --color-accent-deep: #8a4d12;
   --font-sans: 'Noto Sans JP', system-ui, sans-serif;
   --font-serif: 'Shippori Mincho', Georgia, serif;
+
+  /* 予測ツールの紹介ページ(道具の画面と同じ色と字) */
+  --color-fc-paper: #f6f4ef;
+  --color-fc-ink: #1d2422;
+  --color-fc-sub: #55615c;
+  --color-fc-line: #d8dcd6;
+  --color-fc-accent: #0b6b5f;
+  --color-fc-accent-deep: #08524a;
+  --color-fc-soft: #e3f1ee;
+  --color-fc-base: #a7afab;
+  --color-fc-sat: #2f5fb8;
+  --color-fc-sun: #c0392b;
+  --font-fc: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Yu Gothic', sans-serif;
 }
 
 html {
@@ -17,4 +30,14 @@ html {
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+}
+
+/* 予想表の行を読み込み時に1回だけ順に出す */
+@keyframes fc-row-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+.fc-row { animation: fc-row-in 420ms ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .fc-row { animation: none; }
 }
