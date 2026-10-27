@@ -12,9 +12,9 @@ const INDUSTRIES: Industry[] = ['restaurant', 'callcenter', 'logistics']
 // デモは業種ごとに別の画面(public/tools/forecast/<業種>/)
 const DEMO_URL = (ind: Industry): string => `/tools/forecast/${ind}/`
 
-// 冒頭の予想表。数字はテスト画面(2026-10-25 最終検収版)に出る値をそのまま写したもの。null は休み
-// 気象庁データの組み込み後に数字が変わるので、公開前に写し直す
-const DAYS = [
+// 冒頭の予想表。数字はテスト画面(2026-10-27 天気の自動取得版)に出る値をそのまま写したもの。null は休み
+// 飲食のテストデータは東京の実際の天気に合わせた期間なので、日付が他の業種と違う
+const NEW_YEAR = [
   { d: '1/1', w: '祝' },
   { d: '1/2', w: '金' },
   { d: '1/3', w: '土' },
@@ -24,7 +24,10 @@ const DAYS = [
   { d: '1/7', w: '水' },
 ]
 
+type Day = { d: string; w: string }
+
 type Sheet = {
+  days: Day[]
   rows: { label: string; unit: string; values: (number | null)[]; strong?: boolean }[]
   foot: string
 }
@@ -55,22 +58,31 @@ const COPY: Record<Industry, Copy> = {
       '予約が多い日と少ない日で、読みが大きく外れる',
     ],
     features: [
-      { title: '来客数の予想', body: 'この先1週間、日ごとの来客数を出します。曜日・祝日のほか、前日までの予約数や雨の予報を列として入れると、それも考えに入れます。' },
+      { title: '来客数の予想', body: 'この先1週間、日ごとの来客数を出します。曜日・祝日のほか、前日までの予約数を列として入れると、それも考えに入れます。お店の都道府県を選ぶと、過去の天気と、この先7日の気象庁の降水確率が毎朝自動で入ります。' },
       { title: '仕込み量の目安', body: '主なメニューごとに「お客さん100人のうち何人が頼むか」と原価を入れると、日ごとの仕込み量の目安を出します。品切れしないための上乗せも決められます。' },
       { title: '食品ロスの比べ', body: '「もしこの予想で仕込んでいたら、どれだけ余って、どれだけ足りなかったか」を、いつものやり方と比べて食数と原価で出します。' },
       { title: '必要なスタッフの人数', body: 'スタッフ1人が1日に対応できるお客さんの数と、暇な日でも必要な最低人数から、日ごとの人数を出します。' },
     ],
     sheet: {
+      days: [
+        { d: '10/24', w: '土' },
+        { d: '10/25', w: '日' },
+        { d: '10/26', w: '月' },
+        { d: '10/27', w: '火' },
+        { d: '10/28', w: '水' },
+        { d: '10/29', w: '木' },
+        { d: '10/30', w: '金' },
+      ],
       rows: [
-        { label: '予想来客数', unit: '人', values: [69, 101, 132, 111, 54, 66, 79], strong: true },
-        { label: '必要なスタッフ', unit: '人', values: [3, 5, 6, 5, 3, 3, 4] },
-        { label: '日替わり定食の仕込み', unit: '食', values: [27, 39, 51, 43, 21, 26, 31] },
+        { label: '予想来客数', unit: '人', values: [129, 110, 67, 52, 82, 77, 95], strong: true },
+        { label: '必要なスタッフ', unit: '人', values: [6, 5, 3, 3, 4, 4, 4] },
+        { label: '日替わり定食の仕込み', unit: '食', values: [50, 43, 26, 21, 32, 30, 37] },
       ],
       foot: 'スタッフ1人あたり25人・最低2人、日替わり定食は100人中35人が頼み、上乗せ10%で計算',
     },
-    scores: [{ label: '来客数', model: 8, base: 17 }],
-    extra: '食品ロスの比べでは、余る食事が1年で約1,280食、原価にして約38万円減る計算でした。品切れも910食から243食に減っています(メニュー3品・仮の割合と原価で計算)。',
-    sampleNote: 'テスト用の来客数データ(作り物)で、2025年4月〜12月を予想した結果',
+    scores: [{ label: '来客数', model: 8, base: 16 }],
+    extra: '食品ロスの比べでは、余る食事が1年で約1,325食、原価にして約39万円減る計算でした。比べた280日で、品切れも891食から296食に減っています(メニュー3品・仮の割合と原価で計算)。',
+    sampleNote: 'テスト用の来客数データ(来客数は作り物、天気は東京の実際の記録)で、2026年1月〜10月を予想した結果',
   },
   callcenter: {
     label: 'コールセンター',
@@ -89,6 +101,7 @@ const COPY: Record<Industry, Copy> = {
       { title: '受けもかけも同じ人のとき', body: '入電と架電を同じオペレーターが兼ねるセンター向けに、両方の件数から必要な人数の目安を出します。' },
     ],
     sheet: {
+      days: NEW_YEAR,
       rows: [
         { label: '予想入電数', unit: '件', values: [218, 574, 134, 94, 821, 700, 642], strong: true },
         { label: '必要なシフト人数', unit: '人', values: [6, 12, 5, 5, 16, 15, 13] },
@@ -117,6 +130,7 @@ const COPY: Record<Industry, Copy> = {
       { title: '作業時間と休憩の割合', body: '1人の作業時間と、朝礼・移動などで作業できない割合を入れて計算します。' },
     ],
     sheet: {
+      days: NEW_YEAR,
       rows: [
         { label: '予想出荷件数', unit: '件', values: [null, null, null, null, 7231, 1267, 1249], strong: true },
         { label: '予想入荷件数', unit: '件', values: [null, null, null, null, 1162, 1163, 1083] },
@@ -159,7 +173,7 @@ function ForecastSheet({ sheet, score }: { sheet: Sheet; score: Score }) {
         <thead>
           <tr className="text-xs text-fc-sub">
             <th scope="col" className="w-0 p-0"><span className="sr-only">項目</span></th>
-            {DAYS.map((day) => (
+            {sheet.days.map((day) => (
               <th key={day.d} scope="col" className="px-0.5 pt-3 pb-1 font-medium">
                 <span className="block">{day.d}</span>
                 <span className={`block ${day.w === '土' ? 'text-fc-sat' : day.w === '日' || day.w === '祝' ? 'text-fc-sun' : ''}`}>{day.w}</span>
