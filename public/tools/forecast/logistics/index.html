@@ -220,6 +220,29 @@ details.fold[open] > summary::after { content: "閉じる ▲"; }
 details.fold > summary .t { font-weight: 700; }
 details.fold > summary .now2 { font-size: 15px; color: var(--muted); line-height: 1.5; overflow-wrap: anywhere; }
 details.fold > .in { display: grid; gap: 14px; padding: 4px 14px 16px; }
+/* ふり返り */
+.mbars { display: flex; align-items: flex-end; gap: 4px; height: 150px; overflow-x: auto; padding-bottom: 2px; }
+.mbars button { flex: 1 0 30px; min-height: 0; height: 100%; padding: 0; border: 0; border-radius: 6px; background: none; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; align-items: end; gap: 2px; font-size: 12px; color: var(--muted); font-weight: 400; }
+.mbars button .v { font-variant-numeric: tabular-nums; }
+.mbars button i { display: block; width: 70%; margin: 0 auto; border-radius: 4px 4px 0 0; background: var(--chip); border: 2px solid transparent; border-bottom: 0; }
+.mbars button.a i { background: var(--accent); }
+.mbars button.b i { background: var(--muted); opacity: .55; }
+.mbars button.a, .mbars button.b { color: var(--ink); font-weight: 700; }
+.box .lbl2 { font-size: 14px; color: var(--muted); }
+.box.ours .lbl2 { color: var(--accent); font-weight: 700; }
+#lookChart { height: 220px; }
+.dlt.up { color: var(--good); font-weight: 700; } .dlt.down { color: var(--bad); font-weight: 700; }
+.conds { display: grid; gap: 10px; }
+.cond { display: grid; grid-template-columns: minmax(0, 200px) minmax(0, 1fr) 64px; gap: 4px 10px; align-items: center; font-size: 15px; }
+.cond .nm { overflow-wrap: anywhere; }
+.cond .ax { position: relative; height: 16px; background: linear-gradient(var(--line), var(--line)) center / 1px 100% no-repeat; }
+.cond .ax i { position: absolute; top: 2px; height: 12px; border-radius: 3px; background: var(--accent); }
+.cond .ax i.neg { background: var(--warn); }
+.cond.weak .ax i { opacity: .35; }
+.cond .pv { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+.cond .ex { grid-column: 1 / -1; font-size: 13px; color: var(--muted); margin-top: -4px; }
+@media (max-width: 520px) { .cond { grid-template-columns: minmax(0, 1fr) 56px; } .cond .ax { grid-column: 1 / -1; grid-row: 2; } }
+.stbl td.why { text-align: left; white-space: normal; min-width: 12em; font-size: 14px; color: var(--muted); }
 @media print {
   body { background: #fff; color: #000; font-size: 12pt; }
   .wrap { max-width: none; padding: 0; gap: 10px; }
@@ -402,6 +425,52 @@ details.fold > .in { display: grid; gap: 14px; padding: 4px 14px 16px; }
     <div id="lossSum" class="field"></div>
     <div class="table-wrap"><table class="stbl" id="prepTbl"></table></div>
     <p class="small" id="lossNote"></p>
+  </section>
+
+  <!-- ふり返り(入れた記録そのものを見る。予想とは別) -->
+  <section class="card" id="lookCard" aria-labelledby="sLook">
+    <h2 class="step" id="sLook"><b>5</b>これまでの数をふり返る</h2>
+    <p class="say">入れた記録そのものを見て、月ごとに比べたり、数が多くなりやすい日の条件を調べたりします。休みの日は数えません。</p>
+    <div class="field">
+      <span class="lbl">月ごとの1日あたりの数</span>
+      <p class="small">棒を押すと、その月を下で比べます(濃い色=比べる月、薄い色=相手の月)。</p>
+      <div class="mbars" id="lookMonths" role="group" aria-label="月ごとの1日あたりの数"></div>
+    </div>
+    <div class="inputs">
+      <div class="field"><label for="lookA">比べる月</label><select id="lookA"></select></div>
+      <div class="field"><label for="lookB">相手の月</label><select id="lookB"></select></div>
+    </div>
+    <p class="notice" id="lookPartial" hidden></p>
+    <p class="now" id="lookSay"></p>
+    <div class="pair" id="lookBoxes"></div>
+    <div class="field">
+      <span class="lbl">日ごとの数(月の1日から)</span>
+      <canvas id="lookChart" aria-label="2つの月の日ごとの数"></canvas>
+      <div class="legend" id="lookLegend"></div>
+    </div>
+    <div class="field">
+      <span class="lbl">曜日ごとの1日あたりの数</span>
+      <p class="small">月によって土日の数が違うので、曜日ごとにも比べます。</p>
+      <div class="table-wrap"><table class="stbl" id="lookDow"></table></div>
+    </div>
+    <div class="field">
+      <span class="lbl">数が多くなりやすい日・少なくなりやすい日</span>
+      <p class="small">それぞれの日を、同じ曜日のいつもの数と比べて、その条件の日はほかの日より何%多いか(少ないか)を出しました。</p>
+      <label for="lookSpan" class="small">見る期間</label>
+      <select id="lookSpan">
+        <option value="91">最後の3か月</option>
+        <option value="183">最後の半年</option>
+        <option value="365" selected>最後の1年</option>
+        <option value="0">全部</option>
+      </select>
+      <div class="conds" id="lookConds"></div>
+      <p class="small" id="lookCondNote">「はっきり」は、日ごとのばらつきを考えても差があると言える条件です(おおよそ95%の確かさ)。日数が5日に足りない条件は「日数が少ない」と出します。</p>
+    </div>
+    <div class="field">
+      <label for="lookTopMode" class="lbl">特に</label>
+      <select id="lookTopMode"><option value="hi">多かった日</option><option value="lo">少なかった日</option></select>
+      <div class="table-wrap"><table class="stbl" id="lookTop"></table></div>
+    </div>
   </section>
 
   <!-- 持ち出し -->
@@ -1510,7 +1579,7 @@ details.fold > .in { display: grid; gap: 14px; padding: 4px 14px 16px; }
     return { cfg: best.cfg, tried: seen.size };
   }
 
-  root.ForecastEngine = { parseGrid, reshapeTables, readXlsx, decodeWeather, weatherOn, sampleRestaurant, sampleCallcenter, sampleOutbound, sampleLogistics, erlangStaff, whatIfAhead, parseCSV, inferColumns, buildSeries, evaluate, forecastAhead, leakTest, suspicious, autoTune, iso, DAY, toDate, guessOff, isOffDay, toWorkDays, toMinutes, ROWS };
+  root.ForecastEngine = { parseGrid, reshapeTables, readXlsx, decodeWeather, weatherOn, sampleRestaurant, sampleCallcenter, sampleOutbound, sampleLogistics, erlangStaff, whatIfAhead, parseCSV, inferColumns, buildSeries, evaluate, forecastAhead, leakTest, suspicious, autoTune, iso, DAY, toDate, guessOff, isOffDay, toWorkDays, toMinutes, ROWS, isHoliday: (t) => JP_HOLIDAYS.has(iso(t)) };
 })(typeof window !== "undefined" ? window : globalThis);
 
 </script>
@@ -1864,7 +1933,7 @@ details.fold > .in { display: grid; gap: 14px; padding: 4px 14px 16px; }
     const gaps = cfgFromUI().known.map((c) => { const v = st.S.data[c].slice(0, lastT + 1), e = v.filter((x) => isNaN(x)).length; return [c, e, v.length]; }).filter(([, e, n]) => n && e / n > 0.2);
     $("gapNote").hidden = !gaps.length;
     if (gaps.length) $("gapNote").textContent = `「${gaps.map(([c, e, n]) => `${c}(過去${n}日のうち${e}日が空欄)`).join("・")}」は、過去の分があまり入っていません。空欄の日は「何も無かった日」として扱うので、効果をうまく学べません。過去に起きた日の値もファイルに入れてください。`;
-    renderFileCheck(); renderWeather(); renderAhead(); renderStaff(); renderLoss(); renderBars(); drawChart();
+    renderFileCheck(); renderWeather(); renderAhead(); renderStaff(); renderLoss(); renderBars(); drawChart(); renderLook();
   }
 
   // ---- 必要な人数
@@ -2087,6 +2156,181 @@ details.fold > .in { display: grid; gap: 14px; padding: 4px 14px 16px; }
     $("bars").innerHTML = top.map(([n, v]) => `<div class="bar"><span title="${esc(n)}">${esc(n)}</span><div style="width:${Math.max(3, (v / mx) * 100)}%"></div></div>`).join("");
   }
 
+  // ---- ふり返り(入れた記録そのものを見る。予想の計算には使わない)
+  const look = { a: null, b: null };
+  const ym = (t) => iso(t).slice(0, 7);
+  const ymText = (k) => `${+k.slice(0, 4)}年${+k.slice(5)}月`;
+  const prevYm = (k, n = 1) => { const d = new Date(Date.UTC(+k.slice(0, 4), +k.slice(5) - 1 - n, 1)); return iso(d).slice(0, 7); };
+  const iso = (t) => E.iso(t);
+  const mean = (v) => (v.length ? v.reduce((s, x) => s + x, 0) / v.length : NaN);
+  const fmtN = (v) => (isNaN(v) ? "–" : Math.abs(v) >= 100 ? Math.round(v).toLocaleString("ja-JP") : (Math.round(v * 10) / 10).toLocaleString("ja-JP"));
+  const signPct = (r) => (isNaN(r) ? "–" : `${r >= 0 ? "+" : "−"}${Math.abs(Math.round(r * 100))}%`);
+  // 実績のある日(休みの日を除く)の一覧
+  function lookDays() {
+    const y = st.S.data[st.target], out = [];
+    st.S.days.forEach((t, i) => { if (!isNaN(y[i]) && !(st.off && E.isOffDay(t, st.off))) out.push({ t, i, v: y[i], m: ym(t), d: new Date(t).getUTCDate(), w: new Date(t).getUTCDay() }); });
+    return out;
+  }
+  function renderLook() {
+    if (!$("lookCard") || !st.S) return;
+    const days = lookDays();
+    const months = [...new Set(days.map((x) => x.m))];
+    $("lookCard").hidden = months.length < 1;
+    if (!months.length) return;
+    if (!months.includes(look.a)) look.a = months[months.length - 1];
+    if (!months.includes(look.b) || look.b === look.a) look.b = months.includes(prevYm(look.a)) ? prevYm(look.a) : months.filter((m) => m !== look.a).pop() || look.a;
+    const opt = (sel) => months.map((m) => `<option value="${m}" ${m === sel ? "selected" : ""}>${ymText(m)}</option>`).join("");
+    $("lookA").innerHTML = opt(look.a); $("lookB").innerHTML = opt(look.b);
+    // 月ごとの棒(最後の24か月)
+    const shown = months.slice(-24), avg = new Map(shown.map((m) => [m, mean(days.filter((x) => x.m === m).map((x) => x.v))]));
+    const mx = Math.max(...avg.values()) || 1;
+    $("lookMonths").innerHTML = shown.map((m) => `<button type="button" data-m="${m}" class="${m === look.a ? "a" : m === look.b ? "b" : ""}" aria-pressed="${m === look.a}" title="${ymText(m)} 1日あたり${fmtN(avg.get(m))}">`
+      + `<span class="v">${fmtN(avg.get(m))}</span><i style="height:${Math.max(2, (avg.get(m) / mx) * 100)}%"></i><span>${+m.slice(5) === 1 || m === shown[0] ? m.slice(2, 4) + "/" : ""}${+m.slice(5)}月</span></button>`).join("");
+    $("lookMonths").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { look.a = b.dataset.m; look.b = null; renderLook(); }));
+    $("lookMonths").scrollLeft = $("lookMonths").scrollWidth;
+    // 2つの月を比べる。比べる月が途中までなら、相手の月も同じ日までで比べる
+    const lastDay = days[days.length - 1];
+    const partial = look.a === lastDay.m && (() => { const d = new Date(lastDay.t); return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate() > d.getUTCDate(); })();
+    const cut = partial ? new Date(lastDay.t).getUTCDate() : 31;
+    const A = days.filter((x) => x.m === look.a && x.d <= cut), B = days.filter((x) => x.m === look.b && x.d <= cut);
+    $("lookPartial").hidden = !partial;
+    if (partial) $("lookPartial").textContent = `${ymText(look.a)}は${cut}日までの記録なので、${ymText(look.b)}も1日〜${cut}日で比べています。`;
+    const u = unit(), sum = (v) => v.reduce((s, x) => s + x.v, 0);
+    const box = (L, k, ours) => {
+      const top = L.slice().sort((p, q) => q.v - p.v)[0];
+      return `<div class="box ${ours ? "ours" : ""}"><span class="lbl2">${ymText(k)}${partial ? `(1〜${cut}日)` : ""}</span>`
+        + `<span class="big2">1日あたり ${fmtN(mean(L.map((x) => x.v)))}${u}</span>`
+        + `<span class="small">合計 ${fmtN(sum(L))}${u} ・ ${L.length}日分</span>`
+        + (top ? `<span class="small">一番多かった日 ${fmtMD(top.t)} ${fmtN(top.v)}${u}</span>` : "") + `</div>`;
+    };
+    $("lookBoxes").innerHTML = box(A, look.a, true) + box(B, look.b, false);
+    const mA = mean(A.map((x) => x.v)), mB = mean(B.map((x) => x.v)), r = mA / mB - 1;
+    // 曜日の並びの違いを除いた比べ方: 曜日ごとの比を、比べる月の曜日の日数で重みづけ
+    let ws = 0, wr = 0;
+    for (let w = 0; w < 7; w++) { const a = A.filter((x) => x.w === w), b = B.filter((x) => x.w === w); if (a.length && b.length) { wr += (mean(a.map((x) => x.v)) / mean(b.map((x) => x.v)) - 1) * a.length; ws += a.length; } }
+    const rw = ws ? wr / ws : NaN;
+    $("lookSay").textContent = !A.length || !B.length || look.a === look.b ? "比べる月と相手の月を選んでください。"
+      : `${ymText(look.a)}は${ymText(look.b)}より、1日あたり${signPct(r)}(${r >= 0 ? "+" : "−"}${fmtN(Math.abs(mA - mB))}${u})。`
+        + (!isNaN(rw) && Math.abs(rw - r) >= 0.02 ? `曜日の並びの違いをそろえると${signPct(rw)}です。` : "");
+    drawLook(A, B);
+    // 曜日ごと
+    const dowRow = (w) => { const a = mean(A.filter((x) => x.w === w).map((x) => x.v)), b = mean(B.filter((x) => x.w === w).map((x) => x.v)), d = a / b - 1;
+      return isNaN(a) && isNaN(b) ? "" : `<tr><td>${WD[w]}曜</td><td>${fmtN(a)}</td><td>${fmtN(b)}</td><td class="dlt ${d >= 0.05 ? "up" : d <= -0.05 ? "down" : ""}">${signPct(d)}</td></tr>`; };
+    $("lookDow").innerHTML = `<thead><tr><th>曜日</th><th>${ymText(look.a)}</th><th>${ymText(look.b)}</th><th>差</th></tr></thead><tbody>${[1, 2, 3, 4, 5, 6, 0].map(dowRow).join("")}</tbody>`;
+    renderConds(days);
+  }
+  function drawLook(A, B) {
+    const cv = $("lookChart"); if (!cv || !cv.clientWidth) return;
+    const ctx = cv.getContext("2d"), css = getComputedStyle(document.documentElement), col = (n) => css.getPropertyValue(n).trim();
+    const dpr = window.devicePixelRatio || 1, W = cv.clientWidth, H = cv.clientHeight;
+    cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+    const vals = A.concat(B).map((x) => x.v); if (!vals.length) return;
+    let lo = 0, hi = Math.max(...vals) * 1.08 || 1;
+    const L = 48, R = 10, T = 10, Bm = 26, n = 31;
+    const x = (d) => L + ((d - 1) / (n - 1)) * (W - L - R), yy = (v) => T + (1 - (v - lo) / (hi - lo)) * (H - T - Bm);
+    ctx.strokeStyle = col("--line"); ctx.fillStyle = col("--muted"); ctx.lineWidth = 1;
+    ctx.font = `13px ${col("--font-body")}`; ctx.textAlign = "right"; ctx.textBaseline = "middle";
+    const step = niceStep(hi / 4);
+    for (let v = 0; v <= hi; v += step) { ctx.beginPath(); ctx.moveTo(L, yy(v)); ctx.lineTo(W - R, yy(v)); ctx.stroke(); ctx.fillText(String(Math.round(v * 100) / 100), L - 6, yy(v)); }
+    ctx.textAlign = "center"; ctx.textBaseline = "top";
+    for (const d of W < 520 ? [1, 10, 20, 31] : [1, 5, 10, 15, 20, 25, 31]) ctx.fillText(`${d}日`, x(d), H - Bm + 6);
+    const line = (P, color, w, dash) => {
+      ctx.strokeStyle = color; ctx.lineWidth = w; ctx.setLineDash(dash); ctx.beginPath();
+      P.forEach((p, k) => { if (k && p.d - P[k - 1].d > 1) ctx.moveTo(x(p.d), yy(p.v)); else if (k) ctx.lineTo(x(p.d), yy(p.v)); else ctx.moveTo(x(p.d), yy(p.v)); });
+      ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = color; P.forEach((p) => { ctx.beginPath(); ctx.arc(x(p.d), yy(p.v), 2.5, 0, 7); ctx.fill(); });
+    };
+    line(B, col("--muted"), 1.6, [5, 4]);
+    line(A, col("--accent"), 2.4, []);
+    $("lookLegend").innerHTML = `<span><i style="background:var(--accent)"></i>${ymText(look.a)}</span><span><i style="background:var(--muted)"></i>${ymText(look.b)}</span><span>休みの日は線が途切れます</span>`;
+  }
+  // 条件ごとの差。各日を「同じ曜日の平均」で割った比で比べるので、曜日の違いは混ざらない
+  function lookConditions(D) {
+    const C = [], idx = new Set(D.map((x) => x.i));
+    const add = (name, test, ex) => C.push({ name, test, ex });
+    add("祝日", (x) => E.isHoliday(x.t));
+    add("祝日の前の日", (x) => E.isHoliday(x.t + E.DAY) && !E.isHoliday(x.t));
+    add("祝日の次の日", (x) => E.isHoliday(x.t - E.DAY) && !E.isHoliday(x.t));
+    add("月初め(1〜5日)", (x) => x.d <= 5);
+    add("月末(25日〜末日)", (x) => x.d >= 25);
+    const w = st.wxOn;
+    if (w) {
+      add("雨の日(1mm以上)", (x) => w.pr[x.i] >= 1, "気象庁の観測");
+      add("大雨の日(10mm以上)", (x) => w.pr[x.i] >= 10, "気象庁の観測");
+      add("暑い日(最高30℃以上)", (x) => w.tx[x.i] >= 30, "気象庁の観測");
+      add("寒い日(最高10℃未満)", (x) => w.tx[x.i] < 10, "気象庁の観測");
+    }
+    // ほかの列: 予想したい数と、終わってから分かる列(売上など。同じ日の結果なので比べても意味がない)は除く
+    const skip = new Set([st.target, WXCOL, JMACOL, st.order?.col, st.order?.on ? st.order.src : null]);
+    for (const c of st.numeric) {
+      if (skip.has(c) || st.roles[c] === "past" || !st.S.data[c]) continue;
+      const v = st.S.data[c], vals = D.map((x) => v[x.i]).filter((a) => !isNaN(a));
+      if (vals.length < 10) continue;
+      if (st.roles[c] !== "known" && sameAsTarget(D, v)) continue;
+      if (isFlag(c)) { add(`「${c}」がある日`, (x) => v[x.i] === 1, "入れた列"); continue; }
+      const z = vals.filter((a) => a === 0).length;
+      if (z >= vals.length * 0.1 && z <= vals.length * 0.9) { add(`「${c}」が0より多い日`, (x) => v[x.i] > 0, "入れた列"); continue; }
+      const q = vals.slice().sort((a, b) => a - b)[Math.floor(vals.length * 0.75)];
+      add(`「${c}」が多い日(上位4分の1)`, (x) => v[x.i] >= q && !isNaN(v[x.i]), "入れた列");
+    }
+    return C.filter(() => idx.size);
+  }
+  // 予想したい数とほぼ同じ動きの列(売上など、その日の結果)は、比べても理由にならないので外す
+  function sameAsTarget(D, v) {
+    const P = D.filter((x) => !isNaN(v[x.i])), a = P.map((x) => x.v), b = P.map((x) => v[x.i]), ma = mean(a), mb = mean(b);
+    let sab = 0, saa = 0, sbb = 0;
+    for (let k = 0; k < a.length; k++) { sab += (a[k] - ma) * (b[k] - mb); saa += (a[k] - ma) ** 2; sbb += (b[k] - mb) ** 2; }
+    return saa && sbb ? sab / Math.sqrt(saa * sbb) > 0.85 : false;
+  }
+  function lookRatios(D) {
+    const base = [0, 1, 2, 3, 4, 5, 6].map((w) => mean(D.filter((x) => x.w === w).map((x) => x.v)));
+    return D.map((x) => ({ ...x, r: base[x.w] > 0 ? x.v / base[x.w] : NaN })).filter((x) => !isNaN(x.r));
+  }
+  function renderConds(all) {
+    const span = +$("lookSpan").value, end = all[all.length - 1].t;
+    const D = lookRatios(all.filter((x) => !span || x.t > end - span * E.DAY));
+    const sd = (v, m) => Math.sqrt(v.reduce((s, x) => s + (x - m) ** 2, 0) / Math.max(1, v.length - 1));
+    const rows = lookConditions(D).map((c) => {
+      const yes = D.filter(c.test).map((x) => x.r), no = D.filter((x) => !c.test(x)).map((x) => x.r);
+      if (!yes.length || no.length < 5) return null;
+      const m1 = mean(yes), m0 = mean(no), eff = m1 / m0 - 1;
+      const se = Math.sqrt(sd(yes, m1) ** 2 / yes.length + sd(no, m0) ** 2 / no.length) / m0;
+      const sure = yes.length >= 5 && Math.abs(eff) > 1.96 * se;
+      return { ...c, n: yes.length, eff, sure, tag: yes.length < 5 ? "日数が少ない" : sure ? "はっきり" : "差があるとは言い切れない" };
+    }).filter(Boolean).sort((a, b) => (b.sure - a.sure) || (Math.abs(b.eff) - Math.abs(a.eff)));
+    const mx = Math.max(0.1, ...rows.map((r) => Math.abs(r.eff)));
+    $("lookConds").innerHTML = rows.length ? rows.map((r) => {
+      const w = (Math.abs(r.eff) / mx) * 50;
+      return `<div class="cond ${r.sure ? "" : "weak"}"><span class="nm">${esc(r.name)}</span>`
+        + `<span class="ax" aria-hidden="true"><i class="${r.eff < 0 ? "neg" : ""}" style="left:${r.eff < 0 ? 50 - w : 50}%;width:${Math.max(1, w)}%"></i></span>`
+        + `<span class="pv">${signPct(r.eff)}</span><span class="ex">${r.n}日 ・ ${r.tag}${r.ex ? ` ・ ${r.ex}` : ""}</span></div>`;
+    }).join("") : `<p class="small">見る期間の日数が少なく、条件を比べられません。</p>`;
+    // 特に多かった日・少なかった日(同じ曜日のいつもと比べた比で並べる)
+    const hi = $("lookTopMode").value === "hi", u = unit();
+    const hidden = new Set(st.numeric.filter((c) => st.S.data[c] && st.roles[c] !== "known" && c !== st.target && sameAsTarget(D, st.S.data[c])));
+    const top = D.slice().sort((a, b) => (hi ? b.r - a.r : a.r - b.r)).slice(0, 10);
+    const why = (x) => {
+      const s = [];
+      if (E.isHoliday(x.t)) s.push("祝日");
+      else if (E.isHoliday(x.t + E.DAY)) s.push("祝日の前の日");
+      else if (E.isHoliday(x.t - E.DAY)) s.push("祝日の次の日");
+      if (x.d <= 5) s.push("月初め"); if (x.d >= 25) s.push("月末");
+      if (st.wxOn) { const p = st.wxOn.pr[x.i], t = st.wxOn.tx[x.i]; if (p >= 1) s.push(`雨 ${p}mm`); if (t >= 30 || t < 10) s.push(`最高${t}℃`); }
+      for (const c of st.numeric) {
+        if (c === st.target || c === WXCOL || c === JMACOL || st.roles[c] === "past" || !st.S.data[c] || hidden.has(c)) continue;
+        const v = st.S.data[c][x.i];
+        if (isFlag(c) ? v === 1 : !isNaN(v) && v > 0 && /セール|キャンペ|CM|DM|イベント|割引|予約/.test(c)) s.push(isFlag(c) ? esc(c) : `${esc(c)} ${fmtN(v)}`);
+      }
+      return s.join("・") || "とくになし";
+    };
+    $("lookTop").innerHTML = `<thead><tr><th>日付</th><th>数</th><th>同じ曜日のいつもより</th><th>その日にあったこと</th></tr></thead><tbody>`
+      + top.map((x) => `<tr><td>${fmtYMD(x.t).slice(0, 5) === fmtYMD(end).slice(0, 5) ? "" : new Date(x.t).getUTCFullYear() + "/"}${fmtMD(x.t)}</td><td>${fmtN(x.v)}${u}</td><td class="dlt ${x.r >= 1 ? "up" : "down"}">${signPct(x.r - 1)}</td><td class="why">${why(x)}</td></tr>`).join("") + `</tbody>`;
+  }
+  $("lookA")?.addEventListener("change", (e) => { look.a = e.target.value; look.b = null; renderLook(); });
+  $("lookB")?.addEventListener("change", (e) => { look.b = e.target.value; renderLook(); });
+  $("lookSpan")?.addEventListener("change", () => renderConds(lookDays()));
+  $("lookTopMode")?.addEventListener("change", () => renderConds(lookDays()));
+
   // ---- グラフ
   function drawChart() {
     const cv = $("chart"), ctx = cv.getContext("2d");
@@ -2263,8 +2507,8 @@ details.fold > .in { display: grid; gap: 14px; padding: 4px 14px 16px; }
   });
   document.querySelectorAll("#menus input, #lossMargin").forEach((el) => el.addEventListener("input", renderLoss));
   for (const id of ["whInCol", "outGoalType", "outAbsent", "outHoursCol", "whRate", "whHours", "whShrink", "outRate", "outHours", "outShrink", "shopCap", "shopMin", "inAht", "inHours", "inSlSec", "inSlPct", "inShrink", "outGoal", "outStaff", "staffMode", "bothGoal", "bothRate"]) $(id)?.addEventListener("input", () => { if (st.aheadRaw && ["outAbsent", "outStaff", "staffMode"].includes(id)) applyAbsence(); renderStaff(); renderAhead(); renderLoss(); });
-  let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(drawChart, 100); });
-  const mq = window.matchMedia("(prefers-color-scheme: dark)"); mq.addEventListener?.("change", drawChart);
+  let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { drawChart(); if (st.S) renderLook(); }, 100); });
+  const mq = window.matchMedia("(prefers-color-scheme: dark)"); mq.addEventListener?.("change", () => { drawChart(); if (st.S) renderLook(); });
   new MutationObserver(drawChart).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
   // ---- 設定の保存(人数の計算・メニューの数字。このブラウザの中だけに置き、外には送らない)
