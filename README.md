@@ -15,6 +15,12 @@ React + Vite + Tailwind CSS v4 の静的サイトで、Cloudflare Pages で公�
 2. `src/data/works.ts` の `WORKS` に1件足す
    - サイトで直接売る作品は、Stripeで支払いリンクを作って `buyUrl` に入れる
    - アプリやWebツールは `url` に作品のURLを入れる
+   - 作品ページのタイトル・説明文・OGP・構造化データ・sitemap はビルド時に自動で作られる(`src/data/seo.ts`)
+
+## 検索・SNS向けの情報(SEO)
+
+`npm run build` のあと、`vite.config.ts` の `seo-pages` が `src/data/seo.ts` を読み、ページごとの HTML(`dist/works.html` など)と `dist/sitemap.xml` を書き出す。
+作品以外のページ(予測ツールの業種ページなど)を足したときは `SEO_PAGES` に1件足す。
 
 販売者情報(特商法表記・連絡先)は `src/data/seller.ts` にまとめてある。
 
