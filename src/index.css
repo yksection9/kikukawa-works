@@ -8,8 +8,9 @@
   --color-line: #e4dccf;
   --color-accent: #b4691f;
   --color-accent-deep: #8a4d12;
-  --font-sans: 'Noto Sans JP', system-ui, sans-serif;
-  --font-serif: 'Shippori Mincho', Georgia, serif;
+  /* 書体は Zen Kaku Gothic New の1つだけ(読み込みを軽くするため。font-serif も同じ字) */
+  --font-sans: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Yu Gothic', system-ui, sans-serif;
+  --font-serif: var(--font-sans);
 
   /* 予測ツールの紹介ページ(道具の画面と同じ色と字) */
   --color-fc-paper: #f6f4ef;
