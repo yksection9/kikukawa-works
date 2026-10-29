@@ -33,6 +33,10 @@ const today = Date.parse(iso(jstNow)), yesterday = today - DAY;
 const start = Date.parse(data.start);
 const log = [];
 
+// その日の分を取得済みなら、気象庁へは行かずに終わる(予備の時刻に起動しても1日1回で済むように)
+const doneToday = data.fc?.dates?.[0] === iso(today) && data.end === iso(yesterday) && data.prefs.every((p) => p[2].at(-1) !== "!" && p[3].at(-1) !== "!");
+if (doneToday) { console.log(`今日(${iso(today)})の分は取得済みなので、何もしません`); process.exit(0); }
+
 // ---- 1. 実測: 最後の日の次の日から昨日までの枠を足し、欠けている日だけ取りに行く
 const n0 = Math.round((Date.parse(data.end) - start) / DAY) + 1, n1 = Math.round((yesterday - start) / DAY) + 1;
 if (n1 > n0) for (const p of data.prefs) { p[2] += "!".repeat(n1 - n0); p[3] += "!".repeat(n1 - n0); }
