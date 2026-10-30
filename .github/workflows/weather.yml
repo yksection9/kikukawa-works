@@ -3,7 +3,11 @@
 name: weather
 on:
   schedule:
-    - cron: "30 21 * * *" # 毎朝 6:30(日本時間)。5時発表の予報が出たあと
+    # GitHub の定期実行は混み合うと数時間遅れたり飛ばされたりするので、予備の時刻も置く。
+    # 取得済みの日は scripts/fetch-weather.mjs が気象庁へ行かずに終わるので、取りに行くのは1日1回だけ
+    - cron: "7 21 * * *" # 6:07(日本時間)。5時発表の予報が出たあと
+    - cron: "7 23 * * *" # 8:07 予備
+    - cron: "7 2 * * *" # 11:07 予備
   workflow_dispatch:
 permissions:
   contents: write
