@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Thread Status for Claude 導入ガイド</title>
+<meta name="description" content="Claude のプロジェクトとスレッドの状態を1画面で見られる無料ツール「Thread Status for Claude」の導入手順。">
+<style>
+:root{--bg:#faf8f4;--fg:#26231f;--sub:#6b655c;--card:#fff;--line:#e4dfd6;--accent:#b4532a}
+@media(prefers-color-scheme:dark){:root{--bg:#1c1a17;--fg:#ece7de;--sub:#a49d90;--card:#26231f;--line:#3a362f;--accent:#e08a5f}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.8 system-ui,"Hiragino Sans","Yu Gothic",sans-serif}
+main{max-width:720px;margin:0 auto;padding:32px 16px 64px}
+h1{font-size:1.7rem;margin:0 0 8px}h2{font-size:1.2rem;margin:40px 0 12px}
+.lead{color:var(--sub);margin:0 0 24px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:12px 0}
+ol.steps{padding-left:1.3em}ol.steps li{margin:10px 0}
+table{width:100%;border-collapse:collapse;font-size:.95rem}th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}
+pre{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px;overflow-x:auto;white-space:pre-wrap;font-size:.85rem;line-height:1.6}
+.tag{display:inline-block;border:1px solid var(--accent);color:var(--accent);border-radius:99px;padding:0 10px;font-size:.8rem}
+.note{color:var(--sub);font-size:.9rem}
+</style>
+</head>
+<body><main>
+<h1>Thread Status for Claude 導入ガイド</h1>
+<p class="lead">Claude のプロジェクトとスレッドの状態（作業中・あなた待ち・古さ）を1画面で見る、無料のツールです。</p>
+
+<div class="card"><b>ダウンロード（無料）:</b> <a href="cc-window-kit.zip" style="color:var(--accent)">cc-window-kit.zip</a><br>
+<span class="note">解凍すると cc-window-kit フォルダができます。かんたん版は <code>code/start.bat</code> をダブルクリック（Python が必要。Windows 向け）。</span></div>
+
+<h2>まず、どちらで使うか</h2>
+<table>
+<tr><th></th><th>かんたん版</th><th>全部入り版</th></tr>
+<tr><td>見えるもの</td><td>この PC の Claude Code</td><td>＋ クラウドのプロジェクト／スレッド一覧</td></tr>
+<tr><td>準備</td><td>フォルダを開くだけ</td><td>Supabase 無料登録など（約15分。手作業は3つ）</td></tr>
+<tr><td>費用</td><td>無料</td><td>無料（Supabase の無料プランで足ります）</td></tr>
+</table>
+<p class="note">まずかんたん版で試し、一覧が欲しくなったら全部入り版へ進むのがおすすめです。</p>
+
+<h2>全部入り版の手順 <span class="tag">手作業は3つだけ</span></h2>
+<ol class="steps">
+<li><b>Supabase の無料アカウントを作る。</b> supabase.com で Google ログインなどで登録します。</li>
+<li><b>Claude に Supabase コネクタを接続する。</b> Claude の設定のコネクタから Supabase を選び、ブラウザで承認します。</li>
+<li><b>解凍した cc-window-kit フォルダを Claude に接続し、下の依頼文を貼る。</b> 残りの作業（プロジェクト作成、鍵の生成、テーブル作成、設定ファイル、動作確認）は Claude が進めます。</li>
+<li><b>できあがった文面を、Claude の「好み（Preferences）」に1回貼る。</b> 各スレッドが返信のたびに自分の状態を記録するようになります。効かないプロジェクトだけ、そのプロジェクトの指示にも貼ってください。</li>
+<li><b>窓を開き、スレッド一覧に出れば完了です。</b></li>
+</ol>
+
+<h2>Claude に貼る依頼文</h2>
+<pre>Thread Status for Claude のセットアップをお願いします。私への確認なしで、次の順に進めてください。失敗したら原因を1〜2文で教えてください。鍵や秘密は会話に書き出さないでください。
+1. 診断: Supabase コネクタと cc-window-kit フォルダが使えるか確認する。使えなければ、足りないものを1行で伝えて止まる。
+2. Supabase のプロジェクト一覧を見る。「cc-window」という名前のものがあればそれを使う。無ければ無料プランで新規作成する（料金が0であることを確認。0でなければ止まって私に聞く）。
+3. 窓の鍵として、ランダムな40文字の英数字を作る（会話には出さない）。
+4. setup/schema.sql の __WINDOW_KEY__ をその鍵に置き換えて、execute_sql で実行する。
+5. プロジェクトの URL と公開(anon)の鍵を取得し、cc-window-kit フォルダと同じ階層の claude_state/supabase_read.json に {"url":…, "key":…, "header_key":…} で保存する。
+6. setup/user_instruction.md の __SUPABASE_PROJECT_ID__ を実際のIDに置き換えた文面を、setup/my_instruction.md に保存し、画面にも出す。
+7. 動作確認: テスト行を1つ書き込み、読み戻せるか確かめる。確認できたらテスト行を削除する。
+8. 最後に「できたこと／私が次にやること」を3行以内で報告する。</pre>
+
+<h2>つまずいたら</h2>
+<div class="card"><b>Supabase の無料枠は2プロジェクトまで。</b>すでに2つある場合は、使っていない方を一時停止または削除してください（どちらにするかはご自身で選びます）。</div>
+<div class="card"><b>Supabase が一時停止していた。</b>長く使わないと無料プランのプロジェクトは一時停止されます。Supabase の画面から再開できます。</div>
+<div class="card"><b>好み設定が効かないプロジェクトがある。</b>そのプロジェクトの「プロジェクトの指示」に同じ文面を貼ってください。</div>
+
+<h2>安全について</h2>
+<p>状態はあなた自身の Supabase にだけ保存されます。作者のサーバーは通りません。保存するのは、プロジェクト名・スレッドの題名・状態・次に要ることの短い一言だけで、会話の本文は保存しません。依頼文を実行すると Claude があなたのデータベースに書き込みます。内容は上の手順のとおりなので、読んでから貼ってください。</p>
+<p class="note">このツールは Anthropic 社とは関係のない、個人が作った非公式ツールです。Claude の仕様変更で動かなくなることがあります。</p>
+</main></body></html>
