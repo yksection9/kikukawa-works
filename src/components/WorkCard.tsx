@@ -7,7 +7,7 @@ export function WorkRow({ work }: { work: Work }) {
     <li className="border-b border-line">
       <Link
         to={`/works/${work.slug}`}
-        className="group grid grid-cols-[72px_1fr] items-center gap-x-5 gap-y-1 py-6 sm:grid-cols-[112px_1fr_auto] sm:gap-x-8"
+        className="group grid grid-cols-[72px_1fr] items-center gap-x-5 gap-y-1 py-4 sm:py-6 sm:grid-cols-[112px_1fr_auto] sm:gap-x-8"
       >
         <img
           src={work.images[0].src}
