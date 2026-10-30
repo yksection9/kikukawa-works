@@ -31,6 +31,7 @@ export function Layout() {
         <div className="mx-auto flex max-w-5xl flex-col gap-4 px-4 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <p>© {new Date().getFullYear()} {SELLER.brand}</p>
           <div className="flex flex-wrap gap-x-5 gap-y-2">
+            <a href="/tools/cc-window/install.html" className="hover:text-ink">Thread Status for Claude(無料・非公式)</a>
             <Link to="/legal" className="hover:text-ink">特定商取引法に基づく表記</Link>
             <Link to="/privacy" className="hover:text-ink">プライバシーポリシー</Link>
             <a href={`mailto:${SELLER.email}`} className="hover:text-ink">お問い合わせ</a>
