@@ -66,9 +66,10 @@ export const WORKS: Work[] = [
       'この PC の Claude Code だけを見る「かんたん版」もある（Windows）',
     ],
     price: '無料',
-    priceNote: '導入ガイドから、ダウンロードと手順を見られます。画像は表示のイメージです',
+    priceNote: '導入ガイドから、ダウンロードと手順を見られます。画像はサンプルのデータで表示した実際の画面です',
     images: [
-      { src: '/works/thread-status/demo.webp', alt: 'Thread Status for Claude の画面のイメージ。プロジェクトごとにスレッドが並び、入力待ち・作業中・完了が色で分かれている' },
+      { src: '/works/thread-status/demo.webp', alt: 'Thread Status for Claude の実際の画面。プロジェクトごとに、入力待ち・作業中・完了のスレッド数が並ぶ' },
+      { src: '/works/thread-status/demo2.webp', alt: 'プロジェクトを開いた画面。スレッドごとの状態と、次にあなたがすることが出る' },
     ],
     url: '/tools/cc-window/install.html',
     color: '#0b6b5f',
