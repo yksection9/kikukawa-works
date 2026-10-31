@@ -33,6 +33,7 @@ export function Layout() {
         <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <p className="font-black text-card">{SELLER.brand}</p>
           <div className="flex flex-wrap gap-x-6 gap-y-3">
+            <a href="/tools/cc-window/install.html" className="hover:text-card">Thread Status for Claude(無料・非公式)</a>
             <Link to="/legal" className="hover:text-card">特定商取引法に基づく表記</Link>
             <Link to="/privacy" className="hover:text-card">プライバシーポリシー</Link>
             <a href={`mailto:${SELLER.email}`} className="hover:text-card">お問い合わせ</a>
