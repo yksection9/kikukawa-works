@@ -1,16 +1,20 @@
 @import 'tailwindcss';
 
+/* 設計メモは design/NOTES.md。サイトは「作品を掛ける壁」で、色は作品が持ち込む。 */
 @theme {
-  --color-paper: #f7f3ec;
-  --color-card: #fffdf9;
-  --color-ink: #1f1a14;
-  --color-sub: #6b6258;
-  --color-line: #e4dccf;
-  --color-accent: #b4691f;
-  --color-accent-deep: #8a4d12;
-  /* 書体は Zen Kaku Gothic New の1つだけ(読み込みを軽くするため。font-serif も同じ字) */
+  --color-paper: #e2e3de; /* 漆喰の壁 */
+  --color-card: #fafaf7; /* 額の白 */
+  --color-ink: #1d2127; /* 墨 */
+  --color-sub: #575c63; /* 鉛 */
+  --color-line: #c6c8c1; /* 罫 */
+  --color-accent: #1d2127; /* 既定は墨。作品のページでは作品の色に置き換わる */
+  --color-accent-deep: #3a4048;
   --font-sans: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Yu Gothic', system-ui, sans-serif;
   --font-serif: var(--font-sans);
+  --radius-frame: 2px;
+  --radius-thumb: 4px;
+  --radius-button: 10px;
+  --radius-panel: 16px;
 
   /* 予測ツールの紹介ページ(道具の画面と同じ色と字) */
   --color-fc-paper: #f6f4ef;
@@ -27,10 +31,90 @@
 }
 
 html {
-  background: var(--color-paper);
+  background-color: var(--color-paper);
+  /* 壁の質感。ごく薄いざらつきだけ足す */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .11 0 0 0 0 .13 0 0 0 0 .15 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   color: var(--color-ink);
   font-family: var(--font-sans);
+  line-height: 1.8;
   -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 3px;
+}
+
+/* 壁に掛けた額。光は左上、影は右下へ落ちる */
+.frame {
+  background: var(--color-card);
+  border-radius: var(--radius-frame);
+  padding: 12px;
+  box-shadow:
+    inset 1px 1px 0 rgb(255 255 255 / 0.9),
+    1px 2px 2px rgb(29 33 39 / 0.18),
+    8px 14px 20px -8px rgb(29 33 39 / 0.32),
+    24px 40px 56px -24px rgb(29 33 39 / 0.28);
+}
+
+@media (min-width: 640px) {
+  .frame {
+    padding: 20px;
+  }
+}
+
+.frame img {
+  display: block;
+  box-shadow: inset 0 0 0 1px rgb(29 33 39 / 0.08);
+}
+
+.btn {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: var(--radius-button);
+  padding: 0 24px;
+  font-weight: 700;
+  font-size: 15px;
+  transition: background-color 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.btn-solid {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.btn-solid:hover {
+  background: color-mix(in srgb, var(--color-accent) 82%, black);
+}
+
+.btn-line {
+  border: 1.5px solid var(--color-ink);
+  color: var(--color-ink);
+}
+
+.btn-line:hover {
+  background: var(--color-ink);
+  color: var(--color-card);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+.rise {
+  animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise {
+    animation: none;
+  }
 }
 
 /* 予想表の行を読み込み時に1回だけ順に出す */

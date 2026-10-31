@@ -19,7 +19,7 @@ export type SeoPage = {
   noSitemap?: boolean
 }
 
-const DEFAULT_IMAGE = '/works/whisky/bar-full.webp'
+const DEFAULT_IMAGE = '/works/whisky/cover.webp'
 const abs = (p: string) => (p.startsWith('http') ? p : SITE_URL + p)
 
 const person = { '@type': 'Person', name: SELLER.name, url: `${SITE_URL}/about` }
