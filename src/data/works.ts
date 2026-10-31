@@ -51,6 +51,29 @@ export const WORKS: Work[] = [
     color: '#0b6b5f',
   },
   {
+    slug: 'thread-status',
+    title: 'Thread Status for Claude',
+    category: 'tool',
+    tagline: 'どのスレッドが、あなたを待っている？',
+    description: [
+      'Claude のプロジェクトとスレッドの状態（作業中・入力待ち・完了）を、1つの画面で見られる無料ツールです。',
+      '状態はあなた自身の Supabase にだけ保存され、作者のサーバーは通りません。個人が作った非公式ツールで、Anthropic 社とは関係ありません。',
+    ],
+    features: [
+      '複数のプロジェクトのスレッドを一覧にして、入力待ちを見落とさない',
+      '作業中・入力待ち・完了を色で区別',
+      'Supabase の無料プランで動く（手作業は3つだけ。残りは Claude が進める）',
+      'この PC の Claude Code だけを見る「かんたん版」もある（Windows）',
+    ],
+    price: '無料',
+    priceNote: '導入ガイドから、ダウンロードと手順を見られます。画像は表示のイメージです',
+    images: [
+      { src: '/works/thread-status/demo.webp', alt: 'Thread Status for Claude の画面のイメージ。プロジェクトごとにスレッドが並び、入力待ち・作業中・完了が色で分かれている' },
+    ],
+    url: '/tools/cc-window/install.html',
+    color: '#0b6b5f',
+  },
+  {
     slug: 'whisky-collection',
     title: 'ウイスキーコレクション',
     category: 'app',
