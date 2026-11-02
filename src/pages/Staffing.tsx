@@ -1,5 +1,6 @@
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Field, Section } from '../components/Calc'
 import { usePageTitle } from '../usePageTitle'
 
 // コールセンターの必要人数を計算するページ(無料・登録なし)。「アーランC 計算」などで検索して来た人の入口で、
@@ -28,36 +29,6 @@ function rowFor(a: number, n: number, ahtSec: number, targetSec: number): Row {
 
 const pct = (v: number) => `${(v * 100).toFixed(1)}%`
 const sec = (v: number) => (Number.isFinite(v) ? `${Math.round(v)}秒` : '-')
-
-function Field({ label, hint, unit, value, onChange, step = 1 }: { label: string; hint?: string; unit: string; value: number; onChange: (v: number) => void; step?: number }) {
-  return (
-    <label className="block">
-      <span className="font-bold">{label}</span>
-      {hint && <span className="mt-0.5 block text-sm text-fc-sub">{hint}</span>}
-      <span className="mt-2 flex items-center gap-2">
-        <input
-          type="number"
-          inputMode="decimal"
-          min={0}
-          step={step}
-          value={Number.isFinite(value) ? value : ''}
-          onChange={(e) => onChange(e.target.value === '' ? NaN : Number(e.target.value))}
-          className="w-full min-w-0 rounded-lg border border-fc-line bg-white px-3 py-2.5 text-lg tabular-nums focus-visible:outline-2 focus-visible:outline-fc-accent"
-        />
-        <span className="shrink-0 text-fc-sub">{unit}</span>
-      </span>
-    </label>
-  )
-}
-
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="mt-16 border-t border-fc-line pt-8 sm:mt-20">
-      <h2 className="text-[21px] font-bold sm:text-[27px]">{title}</h2>
-      <div className="mt-5">{children}</div>
-    </section>
-  )
-}
 
 export function Staffing() {
   usePageTitle('コールセンターの必要人数を計算(アーランC・無料)')

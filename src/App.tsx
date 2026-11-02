@@ -5,9 +5,11 @@ import { Forecast } from './pages/Forecast'
 import { Home } from './pages/Home'
 import { Legal } from './pages/Legal'
 import { NotFound } from './pages/NotFound'
+import { Prep } from './pages/Prep'
 import { Privacy } from './pages/Privacy'
 import { Staffing } from './pages/Staffing'
 import { WorkDetail } from './pages/WorkDetail'
+import { Workforce } from './pages/Workforce'
 import { Works } from './pages/Works'
 
 export function App() {
@@ -20,6 +22,8 @@ export function App() {
         <Route path="/forecast" element={<Forecast />} />
         <Route path="/forecast/:industry" element={<Forecast />} />
         <Route path="/forecast/callcenter/staffing" element={<Staffing />} />
+        <Route path="/forecast/restaurant/prep" element={<Prep />} />
+        <Route path="/forecast/logistics/staffing" element={<Workforce />} />
         <Route path="/about" element={<About />} />
         <Route path="/legal" element={<Legal />} />
         <Route path="/privacy" element={<Privacy />} />

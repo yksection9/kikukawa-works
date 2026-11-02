@@ -111,6 +111,40 @@ const forecastPages: SeoPage[] = [
       },
     ],
   },
+  {
+    path: '/forecast/restaurant/prep',
+    title: `飲食店の仕込み量とスタッフ人数を計算(無料)| ${SELLER.brand}`,
+    description: '来客数の見込みとメニューを頼む割合を入れるだけで、仕込み量の目安と必要なスタッフの人数を計算。品切れ防止の上乗せが余ったときの1か月の原価も分かります。登録不要・無料。',
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebApplication',
+        name: '飲食店の仕込み量とスタッフ人数の計算',
+        url: `${SITE_URL}/forecast/restaurant/prep`,
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'Web',
+        offers: { '@type': 'Offer', price: '0', priceCurrency: 'JPY' },
+        author: person,
+      },
+    ],
+  },
+  {
+    path: '/forecast/logistics/staffing',
+    title: `倉庫の工程ごとの必要人数を計算(物流・無料)| ${SELLER.brand}`,
+    description: '出荷件数・入荷件数と、ピッキング・梱包・出荷・入荷の1人1時間あたりの処理件数から、工程ごとの必要人数を計算。工程は自由に足したり消したりできます。登録不要・無料。',
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebApplication',
+        name: '倉庫の工程ごとの必要人数の計算',
+        url: `${SITE_URL}/forecast/logistics/staffing`,
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'Web',
+        offers: { '@type': 'Offer', price: '0', priceCurrency: 'JPY' },
+        author: person,
+      },
+    ],
+  },
 ].map((p) => ({ ...p, image: FORECAST_IMAGE }))
 
 export const SEO_PAGES: SeoPage[] = [
