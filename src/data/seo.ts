@@ -94,6 +94,23 @@ const forecastPages: SeoPage[] = [
     title: `物流・倉庫の出荷件数予測ツール(無料)| ${SELLER.brand}`,
     description: '日別の出荷件数・入荷件数を入れるだけで、この先1週間の件数と工程ごとの必要人数を予想する無料ツール。データはブラウザの外に送りません。',
   },
+  {
+    path: '/forecast/callcenter/staffing',
+    title: `コールセンターの必要人数を計算(アーランC・無料)| ${SELLER.brand}`,
+    description: '1時間の入電数・平均対応時間・「20秒以内に80%」のような目標を入れるだけで、同時に電話に出る人数とシフトに入れる人数をアーランCで計算します。登録不要・無料で、入れた数字は外に送りません。',
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebApplication',
+        name: 'コールセンターの必要人数計算(アーランC)',
+        url: `${SITE_URL}/forecast/callcenter/staffing`,
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'Web',
+        offers: { '@type': 'Offer', price: '0', priceCurrency: 'JPY' },
+        author: person,
+      },
+    ],
+  },
 ].map((p) => ({ ...p, image: FORECAST_IMAGE }))
 
 export const SEO_PAGES: SeoPage[] = [
