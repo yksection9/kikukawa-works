@@ -24,7 +24,8 @@ export function WorkCard({ work }: { work: Work }) {
         <h3 className="text-[20px] leading-snug font-black underline decoration-orange decoration-[3px] decoration-transparent underline-offset-4 group-hover:decoration-orange">
           {work.title}
         </h3>
-        <p className="mt-1 text-[15px] text-sub">{work.tagline}</p>
+        <p className="mt-1 text-[15px] font-bold">{work.tagline}</p>
+        <p className="mt-2 text-[14px] leading-[1.8] text-sub">{work.summary}</p>
       </Link>
     </li>
   )
