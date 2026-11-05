@@ -1,39 +1,36 @@
 @import 'tailwindcss';
 
-/* 設計メモは design/NOTES.md。サイトは「作品を掛ける壁」で、色は作品が持ち込む。 */
+/* 黒・白・オレンジの3色だけ。設計メモは design/NOTES.md */
 @theme {
-  --color-paper: #e2e3de; /* 漆喰の壁 */
-  --color-card: #fafaf7; /* 額の白 */
-  --color-ink: #1d2127; /* 墨 */
-  --color-sub: #575c63; /* 鉛 */
-  --color-line: #c6c8c1; /* 罫 */
-  --color-accent: #1d2127; /* 既定は墨。作品のページでは作品の色に置き換わる */
-  --color-accent-deep: #3a4048;
+  --color-paper: #ffffff;
+  --color-card: #ffffff;
+  --color-ink: #151515; /* 黒 */
+  --color-sub: #595959;
+  --color-line: #e4e4e4;
+  --color-orange: #f26a1b;
+  --color-orange-deep: #c9500a; /* 白地の文字に使うときの濃いオレンジ(4.5:1) */
+  --color-accent: #f26a1b;
   --font-sans: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Yu Gothic', system-ui, sans-serif;
   --font-serif: var(--font-sans);
-  --radius-frame: 2px;
-  --radius-thumb: 4px;
   --radius-button: 10px;
   --radius-panel: 16px;
 
-  /* 予測ツールの紹介ページ(道具の画面と同じ色と字) */
-  --color-fc-paper: #f6f4ef;
-  --color-fc-ink: #1d2422;
-  --color-fc-sub: #55615c;
-  --color-fc-line: #d8dcd6;
-  --color-fc-accent: #0b6b5f;
-  --color-fc-accent-deep: #08524a;
-  --color-fc-soft: #e3f1ee;
-  --color-fc-base: #a7afab;
-  --color-fc-sat: #2f5fb8;
-  --color-fc-sun: #c0392b;
+  /* 予測ツールの紹介ページも同じ3色に揃える */
+  --color-fc-paper: #ffffff;
+  --color-fc-ink: #151515;
+  --color-fc-sub: #595959;
+  --color-fc-line: #e4e4e4;
+  --color-fc-accent: #151515;
+  --color-fc-accent-deep: #3a3a3a;
+  --color-fc-soft: #fff1e8;
+  --color-fc-base: #b8b8b8;
+  --color-fc-sat: #151515;
+  --color-fc-sun: #c9500a;
   --font-fc: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Yu Gothic', sans-serif;
 }
 
 html {
   background-color: var(--color-paper);
-  /* 壁の質感。ごく薄いざらつきだけ足す */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .11 0 0 0 0 .13 0 0 0 0 .15 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   color: var(--color-ink);
   font-family: var(--font-sans);
   line-height: 1.8;
@@ -41,31 +38,83 @@ html {
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-ink);
+  outline: 3px solid var(--color-orange);
   outline-offset: 3px;
 }
 
-/* 壁に掛けた額。光は左上、影は右下へ落ちる */
-.frame {
-  background: var(--color-card);
-  border-radius: var(--radius-frame);
-  padding: 12px;
+/* ガラスの札。黒い台の上に、すりガラスの板と丸い縁、斜めに浮いた作品の画面。光は左上から */
+.stage {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 20px;
+  aspect-ratio: 4 / 3;
+  background:
+    radial-gradient(120% 90% at 85% 110%, rgb(242 106 27 / 0.55), transparent 55%),
+    linear-gradient(160deg, #2b2b2b 0%, #151515 55%, #0c0c0c 100%);
+}
+
+.stage-plate {
+  position: absolute;
+  inset: 10%;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgb(255 255 255 / 0.2), rgb(255 255 255 / 0.04) 55%, rgb(255 255 255 / 0.1));
+  border: 1px solid rgb(255 255 255 / 0.4);
   box-shadow:
-    inset 1px 1px 0 rgb(255 255 255 / 0.9),
-    1px 2px 2px rgb(29 33 39 / 0.18),
-    8px 14px 20px -8px rgb(29 33 39 / 0.32),
-    24px 40px 56px -24px rgb(29 33 39 / 0.28);
+    inset 1px 1px 0 rgb(255 255 255 / 0.55),
+    inset -1px -1px 0 rgb(255 255 255 / 0.12),
+    0 24px 40px -16px rgb(0 0 0 / 0.7);
+  backdrop-filter: blur(6px);
 }
 
-@media (min-width: 640px) {
-  .frame {
-    padding: 20px;
-  }
+.stage-ring {
+  position: absolute;
+  inset: 16% 22%;
+  aspect-ratio: 1;
+  margin: auto;
+  height: 68%;
+  border-radius: 50%;
+  border: 1.5px solid rgb(255 255 255 / 0.5);
+  box-shadow:
+    inset 2px 3px 6px rgb(0 0 0 / 0.5),
+    0 1px 0 rgb(255 255 255 / 0.25);
 }
 
-.frame img {
+.stage-shot {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 48%;
+  height: 64%;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #fff;
+  transform: rotate(-9deg);
+  box-shadow:
+    inset 0 0 0 3px #fff,
+    0 3px 6px rgb(0 0 0 / 0.35),
+    14px 24px 30px -8px rgb(0 0 0 / 0.65);
+  transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.stage-shot img {
   display: block;
-  box-shadow: inset 0 0 0 1px rgb(29 33 39 / 0.08);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 30%;
+}
+
+/* 操作したときだけ、ひと目盛り起き上がる */
+a:hover .stage-shot,
+a:focus-visible .stage-shot {
+  transform: rotate(-5deg) scale(1.03);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage-shot {
+    transition: none;
+  }
 }
 
 .btn {
@@ -82,12 +131,13 @@ html {
 }
 
 .btn-solid {
-  background: var(--color-accent);
-  color: #fff;
+  background: var(--color-orange);
+  color: var(--color-ink);
 }
 
 .btn-solid:hover {
-  background: color-mix(in srgb, var(--color-accent) 82%, black);
+  background: var(--color-ink);
+  color: #fff;
 }
 
 .btn-line {
@@ -97,7 +147,7 @@ html {
 
 .btn-line:hover {
   background: var(--color-ink);
-  color: var(--color-card);
+  color: #fff;
 }
 
 @keyframes rise {

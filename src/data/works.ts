@@ -14,8 +14,6 @@ export type Work = {
   url?: string
   /** Stripeの支払いリンク。サイトで直接販売する作品だけに設定する */
   buyUrl?: string
-  /** 作品の色(ボタンなどに使う)。白い文字が読める濃さにする。省略すると墨色 */
-  color?: string
 }
 
 export const CATEGORY_LABEL: Record<WorkCategory, string> = {
@@ -48,7 +46,6 @@ export const WORKS: Work[] = [
       { src: '/works/forecast/demo.webp', alt: '予測ツールの画面。実績と予測のグラフと、調整用のスライダー' },
     ],
     url: '/forecast',
-    color: '#0b6b5f',
   },
   {
     slug: 'thread-status',
@@ -72,7 +69,6 @@ export const WORKS: Work[] = [
       { src: '/works/thread-status/demo2.webp', alt: 'プロジェクトを開いた画面。スレッドごとの状態と、次にあなたがすることが出る' },
     ],
     url: '/tools/cc-window/install.html',
-    color: '#0b6b5f',
   },
   {
     slug: 'whisky-collection',
@@ -95,7 +91,6 @@ export const WORKS: Work[] = [
     priceNote: '有料版(ボトル登録数が無制限)はアプリ内で980円・買い切り',
     images: [{ src: '/works/whisky/cover.webp', alt: 'バーカウンターに並んだウイスキーのボトルとテイスティンググラス' }],
     url: 'https://whisky.kikukawaworks.com',
-    color: '#8e5414',
   },
 ]
 
