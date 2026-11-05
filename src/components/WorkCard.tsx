@@ -5,7 +5,7 @@ import { CATEGORY_LABEL, type Work } from '../data/works'
 export function Stage({ src, alt = '' }: { src: string; alt?: string }) {
   return (
     <div className="stage">
-      <div className="stage-shot">
+      <div className="glass stage-shot" style={{ ['--rot' as string]: '-8deg' }}>
         <img src={src} alt={alt} />
       </div>
     </div>

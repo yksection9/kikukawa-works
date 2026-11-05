@@ -1,3 +1,4 @@
+import { Hero } from '../components/Hero'
 import { WorkCard } from '../components/WorkCard'
 import { WORKS } from '../data/works'
 import { usePageTitle } from '../usePageTitle'
@@ -7,14 +8,17 @@ export function Home() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 pt-6 sm:px-8 md:pt-12">
-      <div className="rise">
-        <h1 className="text-[25px] leading-[1.4] font-black sm:text-[39px]">
-          <span className="block whitespace-nowrap">誰かの役に立つ</span>
-          <span className="block whitespace-nowrap">ものを、ひとつずつ。</span>
-        </h1>
-        <p className="mt-3 max-w-[34em] text-[15px] text-sub">
-          私が個人でつくっているアプリ、ツール、書籍のお店です。
-        </p>
+      <div className="rise grid items-center gap-8 md:grid-cols-[5fr_6fr] md:gap-12">
+        <div>
+          <h1 className="text-[25px] leading-[1.4] font-black sm:text-[39px]">
+            <span className="block whitespace-nowrap">誰かの役に立つ</span>
+            <span className="block whitespace-nowrap">ものを、ひとつずつ。</span>
+          </h1>
+          <p className="mt-3 max-w-[34em] text-[15px] text-sub">
+            私が個人でつくっているアプリ、ツール、書籍のお店です。
+          </p>
+        </div>
+        <Hero />
       </div>
 
       <section className="rise mt-8 md:mt-14" style={{ animationDelay: '0.15s' }}>
