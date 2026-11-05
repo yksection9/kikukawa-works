@@ -5,8 +5,6 @@ import { CATEGORY_LABEL, type Work } from '../data/works'
 export function Stage({ src, alt = '' }: { src: string; alt?: string }) {
   return (
     <div className="stage">
-      <div className="stage-plate" />
-      <div className="stage-ring" />
       <div className="stage-shot">
         <img src={src} alt={alt} />
       </div>
