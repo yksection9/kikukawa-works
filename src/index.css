@@ -50,8 +50,10 @@ html {
   border-radius: 20px;
   aspect-ratio: 4 / 3;
   background:
-    radial-gradient(120% 90% at 85% 110%, rgb(242 106 27 / 0.55), transparent 55%),
-    linear-gradient(160deg, #2b2b2b 0%, #151515 55%, #0c0c0c 100%);
+    radial-gradient(70% 80% at 80% 105%, rgb(242 106 27 / 0.32), transparent 62%),
+    radial-gradient(60% 70% at 10% 0%, rgb(242 106 27 / 0.1), transparent 60%),
+    linear-gradient(160deg, #ffffff 0%, #f1f1f1 100%);
+  box-shadow: inset 0 0 0 1px rgb(21 21 21 / 0.08);
 }
 
 /* 画像そのものがガラス板。透けて奥の光が見え、縁に厚みと光が出る。光源は左上 */
@@ -65,13 +67,13 @@ html {
   transform: rotate(-9deg);
   /* 板の厚み: 右下に重なる縁 */
   box-shadow:
-    inset 0 0 0 1.5px rgb(255 255 255 / 0.55),
-    inset 3px 3px 0 rgb(255 255 255 / 0.35),
-    inset -4px -5px 0 rgb(255 255 255 / 0.14),
-    inset -10px -12px 22px rgb(242 106 27 / 0.35),
-    inset 8px 8px 20px rgb(255 255 255 / 0.18),
-    6px 8px 0 -2px rgb(255 255 255 / 0.12),
-    16px 26px 34px -8px rgb(0 0 0 / 0.7);
+    inset 0 0 0 1.5px rgb(255 255 255 / 0.9),
+    inset 0 0 0 3px rgb(21 21 21 / 0.14),
+    inset 4px 4px 0 rgb(255 255 255 / 0.5),
+    inset -10px -12px 22px rgb(242 106 27 / 0.3),
+    inset 8px 8px 20px rgb(255 255 255 / 0.25),
+    7px 9px 0 -2px rgb(21 21 21 / 0.1),
+    16px 26px 34px -10px rgb(21 21 21 / 0.45);
   transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
@@ -82,7 +84,7 @@ html {
   object-fit: cover;
   object-position: 50% 30%;
   border-radius: 20px;
-  opacity: 0.78;
+  opacity: 0.88;
   filter: saturate(1.1) contrast(1.05);
 }
 

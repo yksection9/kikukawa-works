@@ -30,17 +30,17 @@ export function Layout() {
         <Outlet />
       </main>
 
-      <footer className="mt-24 bg-ink text-[14px] text-[#d4d4d4]">
+      <footer className="mt-24 border-t-2 border-ink text-[14px] text-sub">
         <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 sm:flex-row sm:items-center sm:justify-between sm:px-8">
-          <Logo tone="dark" className="h-8 w-auto" />
+          <Logo className="h-8 w-auto" />
           <div className="flex flex-wrap gap-x-6 gap-y-3">
-            <a href="/tools/cc-window/install.html" className="hover:text-orange">Thread Status for Claude(無料・非公式)</a>
-            <Link to="/legal" className="hover:text-orange">特定商取引法に基づく表記</Link>
-            <Link to="/privacy" className="hover:text-orange">プライバシーポリシー</Link>
-            <a href={`mailto:${SELLER.email}`} className="hover:text-orange">お問い合わせ</a>
+            <a href="/tools/cc-window/install.html" className="hover:text-ink hover:underline">Thread Status for Claude(無料・非公式)</a>
+            <Link to="/legal" className="hover:text-ink hover:underline">特定商取引法に基づく表記</Link>
+            <Link to="/privacy" className="hover:text-ink hover:underline">プライバシーポリシー</Link>
+            <a href={`mailto:${SELLER.email}`} className="hover:text-ink hover:underline">お問い合わせ</a>
           </div>
         </div>
-        <p className="mx-auto max-w-6xl px-4 pb-8 text-[13px] text-[#a8a8a8] sm:px-8">
+        <p className="mx-auto max-w-6xl px-4 pb-8 text-[13px] text-sub sm:px-8">
           © {new Date().getFullYear()} {SELLER.brand}
         </p>
       </footer>
