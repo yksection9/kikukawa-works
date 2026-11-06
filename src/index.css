@@ -42,18 +42,88 @@ html {
   outline-offset: 3px;
 }
 
-/* ガラスの札。黒い台の上に、すりガラスの板と丸い縁、斜めに浮いた作品の画面。光は左上から */
-.stage {
+/* カード自体がガラス。画像がカードの全面で、透けて奥のオレンジの光が見える。光源は左上 */
+.gcard {
   position: relative;
   isolation: isolate;
+  aspect-ratio: 4 / 3;
+  border-radius: 20px;
+}
+
+/* ガラスの奥にある光(これが透けて見える) */
+.gcard::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  right: -5%;
+  bottom: -10%;
+  width: 58%;
+  height: 72%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(242 106 27 / 0.75), rgb(242 106 27 / 0.2) 70%, transparent);
+  filter: blur(14px);
+}
+
+.gcard::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: -4%;
+  top: -8%;
+  width: 34%;
+  height: 40%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(242 106 27 / 0.35), transparent);
+  filter: blur(12px);
+}
+
+.gcard-face {
+  position: absolute;
+  inset: 0;
   overflow: hidden;
   border-radius: 20px;
-  aspect-ratio: 4 / 3;
+  backdrop-filter: blur(14px) saturate(1.6);
+  box-shadow:
+    inset 0 0 0 1.5px rgb(255 255 255 / 0.85),
+    inset 0 0 0 3px rgb(21 21 21 / 0.07),
+    inset 4px 4px 14px rgb(255 255 255 / 0.55),
+    inset -10px -12px 26px rgb(242 106 27 / 0.22),
+    0 2px 3px rgb(21 21 21 / 0.18),
+    0 26px 36px -18px rgb(21 21 21 / 0.45);
+  transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.gcard-face img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 25%;
+  opacity: 0.84;
+  filter: saturate(1.15) contrast(1.06) brightness(1.04);
+}
+
+/* つや: 左上の面の反射、斜めの光の帯、下辺のオレンジの透け */
+.gcard-face::after {
+  content: '';
+  position: absolute;
+  inset: 0;
   background:
-    radial-gradient(70% 80% at 80% 105%, rgb(242 106 27 / 0.32), transparent 62%),
-    radial-gradient(60% 70% at 10% 0%, rgb(242 106 27 / 0.1), transparent 60%),
-    linear-gradient(160deg, #ffffff 0%, #f1f1f1 100%);
-  box-shadow: inset 0 0 0 1px rgb(21 21 21 / 0.08);
+    radial-gradient(120% 70% at 0% 0%, rgb(255 255 255 / 0.55), transparent 46%),
+    linear-gradient(112deg, transparent 36%, rgb(255 255 255 / 0.38) 45%, rgb(255 255 255 / 0.05) 54%, transparent 62%),
+    linear-gradient(to top, rgb(242 106 27 / 0.22), transparent 32%);
+  pointer-events: none;
+}
+
+a:hover .gcard-face,
+a:focus-visible .gcard-face {
+  transform: translateY(-4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gcard-face {
+    transition: none;
+  }
 }
 
 /* 画像そのものがガラス。板や枠は付けず、画像が透けて、重なると奥がぼけ、つやが走る。光源は左上 */
@@ -93,15 +163,8 @@ html {
   pointer-events: none;
 }
 
-.stage-shot {
-  position: absolute;
-  inset: 0;
-  margin: auto;
-  width: 60%;
-  height: 74%;
-}
 
-/* 操作したときだけ、ひと目盛り起き上がる */
+
 a:hover .glass,
 a:focus-visible .glass {
   transform: rotate(calc(var(--rot, -6deg) + 3deg)) scale(1.03);

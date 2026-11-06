@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom'
 import { CATEGORY_LABEL, type Work } from '../data/works'
 
-/** ガラスの札。作品の画面が斜めに浮かぶ */
+/** カード自体がガラス。画像が全面に出て、透けて奥の光が見える */
 export function Stage({ src, alt = '' }: { src: string; alt?: string }) {
   return (
-    <div className="stage">
-      <div className="glass stage-shot" style={{ ['--rot' as string]: '-8deg' }}>
+    <div className="gcard">
+      <div className="gcard-face">
         <img src={src} alt={alt} />
       </div>
     </div>
