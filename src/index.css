@@ -60,7 +60,7 @@ html {
   width: 58%;
   height: 72%;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgb(242 106 27 / 0.75), rgb(242 106 27 / 0.2) 70%, transparent);
+  background: radial-gradient(closest-side, rgb(21 21 21 / 0.28), rgb(21 21 21 / 0.08) 70%, transparent);
   filter: blur(14px);
 }
 
@@ -73,7 +73,7 @@ html {
   width: 34%;
   height: 40%;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgb(242 106 27 / 0.35), transparent);
+  background: radial-gradient(closest-side, rgb(21 21 21 / 0.12), transparent);
   filter: blur(12px);
 }
 
@@ -87,7 +87,7 @@ html {
     inset 0 0 0 1.5px rgb(255 255 255 / 0.85),
     inset 0 0 0 3px rgb(21 21 21 / 0.07),
     inset 4px 4px 14px rgb(255 255 255 / 0.55),
-    inset -10px -12px 26px rgb(242 106 27 / 0.22),
+    inset -10px -12px 26px rgb(21 21 21 / 0.08),
     0 2px 3px rgb(21 21 21 / 0.18),
     0 26px 36px -18px rgb(21 21 21 / 0.45);
   transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
@@ -111,7 +111,7 @@ html {
   background:
     radial-gradient(120% 70% at 0% 0%, rgb(255 255 255 / 0.55), transparent 46%),
     linear-gradient(112deg, transparent 36%, rgb(255 255 255 / 0.38) 45%, rgb(255 255 255 / 0.05) 54%, transparent 62%),
-    linear-gradient(to top, rgb(242 106 27 / 0.22), transparent 32%);
+    linear-gradient(to top, rgb(21 21 21 / 0.1), transparent 32%);
   pointer-events: none;
 }
 
@@ -159,7 +159,7 @@ a:focus-visible .gcard-face {
   background:
     radial-gradient(120% 70% at 0% 0%, rgb(255 255 255 / 0.32), transparent 42%),
     linear-gradient(112deg, transparent 38%, rgb(255 255 255 / 0.32) 46%, rgb(255 255 255 / 0.04) 54%, transparent 62%),
-    linear-gradient(to top, rgb(242 106 27 / 0.2), transparent 30%);
+    linear-gradient(to top, rgb(21 21 21 / 0.1), transparent 30%);
   pointer-events: none;
 }
 

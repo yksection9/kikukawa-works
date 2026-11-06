@@ -15,7 +15,7 @@ export function Hero() {
       className="relative aspect-[4/3] w-full overflow-hidden rounded-[24px] md:aspect-[5/4]"
       style={{
         background:
-          'radial-gradient(70% 80% at 85% 110%, rgb(242 106 27 / 0.4), transparent 62%), radial-gradient(50% 60% at 5% -5%, rgb(242 106 27 / 0.14), transparent 60%), linear-gradient(160deg, #fff, #f1f1f1)',
+          '#f2f2f2',
         boxShadow: 'inset 0 0 0 1px rgb(21 21 21 / 0.08)',
       }}
     >
