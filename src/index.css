@@ -1,39 +1,36 @@
 @import 'tailwindcss';
 
-/* 設計メモは design/NOTES.md。サイトは「作品を掛ける壁」で、色は作品が持ち込む。 */
+/* 黒・白・オレンジの3色だけ。設計メモは design/NOTES.md */
 @theme {
-  --color-paper: #e2e3de; /* 漆喰の壁 */
-  --color-card: #fafaf7; /* 額の白 */
-  --color-ink: #1d2127; /* 墨 */
-  --color-sub: #575c63; /* 鉛 */
-  --color-line: #c6c8c1; /* 罫 */
-  --color-accent: #1d2127; /* 既定は墨。作品のページでは作品の色に置き換わる */
-  --color-accent-deep: #3a4048;
+  --color-paper: #ffffff;
+  --color-card: #ffffff;
+  --color-ink: #151515; /* 黒 */
+  --color-sub: #595959;
+  --color-line: #e4e4e4;
+  --color-orange: #f26a1b;
+  --color-orange-deep: #c9500a; /* 白地の文字に使うときの濃いオレンジ(4.5:1) */
+  --color-accent: #f26a1b;
   --font-sans: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Yu Gothic', system-ui, sans-serif;
   --font-serif: var(--font-sans);
-  --radius-frame: 2px;
-  --radius-thumb: 4px;
   --radius-button: 10px;
   --radius-panel: 16px;
 
-  /* 予測ツールの紹介ページ(道具の画面と同じ色と字) */
-  --color-fc-paper: #f6f4ef;
-  --color-fc-ink: #1d2422;
-  --color-fc-sub: #55615c;
-  --color-fc-line: #d8dcd6;
-  --color-fc-accent: #0b6b5f;
-  --color-fc-accent-deep: #08524a;
-  --color-fc-soft: #e3f1ee;
-  --color-fc-base: #a7afab;
-  --color-fc-sat: #2f5fb8;
-  --color-fc-sun: #c0392b;
+  /* 予測ツールの紹介ページも同じ3色に揃える */
+  --color-fc-paper: #ffffff;
+  --color-fc-ink: #151515;
+  --color-fc-sub: #595959;
+  --color-fc-line: #e4e4e4;
+  --color-fc-accent: #151515;
+  --color-fc-accent-deep: #3a3a3a;
+  --color-fc-soft: #fff1e8;
+  --color-fc-base: #b8b8b8;
+  --color-fc-sat: #151515;
+  --color-fc-sun: #c9500a;
   --font-fc: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Yu Gothic', sans-serif;
 }
 
 html {
   background-color: var(--color-paper);
-  /* 壁の質感。ごく薄いざらつきだけ足す */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .11 0 0 0 0 .13 0 0 0 0 .15 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   color: var(--color-ink);
   font-family: var(--font-sans);
   line-height: 1.8;
@@ -41,31 +38,142 @@ html {
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-ink);
+  outline: 3px solid var(--color-orange);
   outline-offset: 3px;
 }
 
-/* 壁に掛けた額。光は左上、影は右下へ落ちる */
-.frame {
-  background: var(--color-card);
-  border-radius: var(--radius-frame);
-  padding: 12px;
-  box-shadow:
-    inset 1px 1px 0 rgb(255 255 255 / 0.9),
-    1px 2px 2px rgb(29 33 39 / 0.18),
-    8px 14px 20px -8px rgb(29 33 39 / 0.32),
-    24px 40px 56px -24px rgb(29 33 39 / 0.28);
+/* カード自体がガラス。画像がカードの全面で、透けて奥のオレンジの光が見える。光源は左上 */
+.gcard {
+  position: relative;
+  isolation: isolate;
+  aspect-ratio: 4 / 3;
+  border-radius: 20px;
 }
 
-@media (min-width: 640px) {
-  .frame {
-    padding: 20px;
+/* ガラスの奥にある光(これが透けて見える) */
+.gcard::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  right: -5%;
+  bottom: -10%;
+  width: 58%;
+  height: 72%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(21 21 21 / 0.28), rgb(21 21 21 / 0.08) 70%, transparent);
+  filter: blur(14px);
+}
+
+.gcard::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: -4%;
+  top: -8%;
+  width: 34%;
+  height: 40%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(21 21 21 / 0.12), transparent);
+  filter: blur(12px);
+}
+
+.gcard-face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 20px;
+  backdrop-filter: blur(14px) saturate(1.6);
+  box-shadow:
+    inset 0 0 0 1.5px rgb(255 255 255 / 0.85),
+    inset 0 0 0 3px rgb(21 21 21 / 0.07),
+    inset 4px 4px 14px rgb(255 255 255 / 0.55),
+    inset -10px -12px 26px rgb(21 21 21 / 0.08),
+    0 2px 3px rgb(21 21 21 / 0.18),
+    0 26px 36px -18px rgb(21 21 21 / 0.45);
+  transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.gcard-face img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 25%;
+  opacity: 0.84;
+  filter: saturate(1.15) contrast(1.06) brightness(1.04);
+}
+
+/* つや: 左上の面の反射、斜めの光の帯、下辺のオレンジの透け */
+.gcard-face::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 70% at 0% 0%, rgb(255 255 255 / 0.55), transparent 46%),
+    linear-gradient(112deg, transparent 36%, rgb(255 255 255 / 0.38) 45%, rgb(255 255 255 / 0.05) 54%, transparent 62%),
+    linear-gradient(to top, rgb(21 21 21 / 0.1), transparent 32%);
+  pointer-events: none;
+}
+
+a:hover .gcard-face,
+a:focus-visible .gcard-face {
+  transform: translateY(-4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gcard-face {
+    transition: none;
   }
 }
 
-.frame img {
+/* 画像そのものがガラス。板や枠は付けず、画像が透けて、重なると奥がぼけ、つやが走る。光源は左上 */
+.glass {
+  position: absolute;
+  border-radius: 6px;
+  transform: rotate(var(--rot, -6deg));
+  backdrop-filter: blur(10px) saturate(1.5);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.75),
+    0 1px 2px rgb(21 21 21 / 0.2),
+    14px 22px 30px -12px rgb(21 21 21 / 0.4);
+  transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.glass img {
   display: block;
-  box-shadow: inset 0 0 0 1px rgb(29 33 39 / 0.08);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 30%;
+  border-radius: 6px;
+  opacity: 0.9;
+  filter: saturate(1.15) contrast(1.08) brightness(1.04);
+}
+
+/* つや: 左上の面の反射と、斜めに走る光の帯、縁の細い光 */
+.glass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  background:
+    radial-gradient(120% 70% at 0% 0%, rgb(255 255 255 / 0.32), transparent 42%),
+    linear-gradient(112deg, transparent 38%, rgb(255 255 255 / 0.32) 46%, rgb(255 255 255 / 0.04) 54%, transparent 62%),
+    linear-gradient(to top, rgb(21 21 21 / 0.1), transparent 30%);
+  pointer-events: none;
+}
+
+
+
+a:hover .glass,
+a:focus-visible .glass {
+  transform: rotate(calc(var(--rot, -6deg) + 3deg)) scale(1.03);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass {
+    transition: none;
+  }
 }
 
 .btn {
@@ -82,12 +190,13 @@ html {
 }
 
 .btn-solid {
-  background: var(--color-accent);
-  color: #fff;
+  background: var(--color-orange);
+  color: var(--color-ink);
 }
 
 .btn-solid:hover {
-  background: color-mix(in srgb, var(--color-accent) 82%, black);
+  background: var(--color-ink);
+  color: #fff;
 }
 
 .btn-line {
@@ -97,7 +206,7 @@ html {
 
 .btn-line:hover {
   background: var(--color-ink);
-  color: var(--color-card);
+  color: #fff;
 }
 
 @keyframes rise {

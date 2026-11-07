@@ -24,7 +24,7 @@ export function Legal() {
   return (
     <div className="mx-auto max-w-3xl px-4 pt-10 sm:px-8 md:pt-16">
       <h1 className="text-[25px] leading-snug font-black sm:text-[39px]">特定商取引法に基づく表記</h1>
-      <dl className="mt-8 overflow-hidden rounded-panel bg-card">
+      <dl className="mt-8 overflow-hidden rounded-panel border-2 border-ink">
         {ROWS.map(([label, value]) => (
           <div key={label} className="flex flex-col gap-1 border-b border-line p-4 last:border-b-0 sm:flex-row sm:gap-6">
             <dt className="shrink-0 text-sm font-medium text-sub sm:w-44">{label}</dt>
