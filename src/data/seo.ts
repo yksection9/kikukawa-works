@@ -132,7 +132,6 @@ export const SEO_PAGES: SeoPage[] = [
 ]
 
 /** sitemap.xml に足す、React の外にある静的ページ */
-export const EXTRA_SITEMAP_PATHS = ['/tools/forecast/restaurant/', '/tools/forecast/callcenter/', '/tools/forecast/logistics/']
 
 export const seoImage = (p: SeoPage) => abs(p.image ?? DEFAULT_IMAGE)
 export const seoUrl = (p: SeoPage) => abs(p.path === '/' ? '/' : p.path)
