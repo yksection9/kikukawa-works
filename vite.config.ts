@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { defineConfig, type Plugin } from 'vite'
-import { EXTRA_SITEMAP_PATHS, SEO_PAGES, SITE_URL, seoImage, seoUrl, type SeoPage } from './src/data/seo.ts'
+import { SEO_PAGES, seoImage, seoUrl, type SeoPage } from './src/data/seo.ts'
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
@@ -49,7 +49,7 @@ function seoPages(): Plugin {
         mkdirSync(dirname(join(outDir, file)), { recursive: true })
         writeFileSync(join(outDir, file), html)
       }
-      const urls = [...SEO_PAGES.filter((p) => !p.noSitemap).map(seoUrl), ...EXTRA_SITEMAP_PATHS.map((p) => SITE_URL + p)]
+      const urls = [...SEO_PAGES.filter((p) => !p.noSitemap).map(seoUrl)]
       const sitemap = [
         '<?xml version="1.0" encoding="UTF-8"?>',
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
