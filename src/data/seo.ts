@@ -94,6 +94,57 @@ const forecastPages: SeoPage[] = [
     title: `物流・倉庫の出荷件数予測ツール(無料)| ${SELLER.brand}`,
     description: '日別の出荷件数・入荷件数を入れるだけで、この先1週間の件数と工程ごとの必要人数を予想する無料ツール。データはブラウザの外に送りません。',
   },
+  {
+    path: '/forecast/callcenter/staffing',
+    title: `コールセンターの必要人数を計算(アーランC・無料)| ${SELLER.brand}`,
+    description: '1時間の入電数・平均対応時間・「20秒以内に80%」のような目標を入れるだけで、同時に電話に出る人数とシフトに入れる人数をアーランCで計算します。登録不要・無料で、入れた数字は外に送りません。',
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebApplication',
+        name: 'コールセンターの必要人数計算(アーランC)',
+        url: `${SITE_URL}/forecast/callcenter/staffing`,
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'Web',
+        offers: { '@type': 'Offer', price: '0', priceCurrency: 'JPY' },
+        author: person,
+      },
+    ],
+  },
+  {
+    path: '/forecast/restaurant/prep',
+    title: `飲食店の仕込み量とスタッフ人数を計算(無料)| ${SELLER.brand}`,
+    description: '来客数の見込みとメニューを頼む割合を入れるだけで、仕込み量の目安と必要なスタッフの人数を計算。品切れ防止の上乗せが余ったときの1か月の原価も分かります。登録不要・無料。',
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebApplication',
+        name: '飲食店の仕込み量とスタッフ人数の計算',
+        url: `${SITE_URL}/forecast/restaurant/prep`,
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'Web',
+        offers: { '@type': 'Offer', price: '0', priceCurrency: 'JPY' },
+        author: person,
+      },
+    ],
+  },
+  {
+    path: '/forecast/logistics/staffing',
+    title: `倉庫の工程ごとの必要人数を計算(物流・無料)| ${SELLER.brand}`,
+    description: '出荷件数・入荷件数と、ピッキング・梱包・出荷・入荷の1人1時間あたりの処理件数から、工程ごとの必要人数を計算。工程は自由に足したり消したりできます。登録不要・無料。',
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebApplication',
+        name: '倉庫の工程ごとの必要人数の計算',
+        url: `${SITE_URL}/forecast/logistics/staffing`,
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'Web',
+        offers: { '@type': 'Offer', price: '0', priceCurrency: 'JPY' },
+        author: person,
+      },
+    ],
+  },
 ].map((p) => ({ ...p, image: FORECAST_IMAGE }))
 
 export const SEO_PAGES: SeoPage[] = [
