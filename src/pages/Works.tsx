@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { WorkRow } from '../components/WorkCard'
+import { WorkCard } from '../components/WorkCard'
 import { CATEGORY_LABEL, WORKS, type WorkCategory } from '../data/works'
 import { usePageTitle } from '../usePageTitle'
 
@@ -31,9 +31,9 @@ export function Works() {
         <p className="pb-3 text-[14px] text-sub">{list.length}点</p>
       </div>
       {list.length > 0 ? (
-        <ul>
+        <ul className="mt-8 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
           {list.map((w) => (
-            <WorkRow key={w.slug} work={w} />
+            <WorkCard key={w.slug} work={w} />
           ))}
         </ul>
       ) : (
