@@ -49,6 +49,14 @@ function seoPages(): Plugin {
         mkdirSync(dirname(join(outDir, file)), { recursive: true })
         writeFileSync(join(outDir, file), html)
       }
+      // 無いページは「404」で返す。Cloudflare Pages は 404.html があると、どのファイルにも合わないパスにこれを 404 で返す。
+      // 無いと全パスがトップと同じ中身の 200 になり、Search Console で「ソフト404」「重複」と判定される(2026-11-09 の警告)。
+      // 中身は SPA のままなので、画面はルーターの NotFound が出る。検索には載せない(noindex)。
+      const notFoundHead = [
+        '<title>ページが見つかりません | Kikukawa Works</title>',
+        '<meta name="robots" content="noindex" />',
+      ].join('\n    ')
+      writeFileSync(join(outDir, '404.html'), base.slice(0, start) + notFoundHead + base.slice(end + '<!--/seo-->'.length))
       const urls = [...SEO_PAGES.filter((p) => !p.noSitemap).map(seoUrl)]
       const sitemap = [
         '<?xml version="1.0" encoding="UTF-8"?>',
