@@ -33,7 +33,7 @@ export function WorkDetail() {
             <img
               src={work.images[active].src}
               alt={work.images[active].alt}
-              className="aspect-[4/5] w-full object-cover"
+              className="aspect-[4/5] w-full object-contain"
             />
           </div>
           {work.images.length > 1 && (
@@ -57,11 +57,11 @@ export function WorkDetail() {
 
         <div>
           <p className="text-[14px] font-bold text-sub">{CATEGORY_LABEL[work.category]}</p>
-          <h1 className="mt-1 text-[31px] leading-snug font-black sm:text-[39px]">{work.title}</h1>
+          <h1 className="mt-1 text-[31px] leading-snug font-serif font-semibold sm:text-[39px]">{work.title}</h1>
           <p className="mt-3 text-[18px] leading-relaxed">{work.tagline}</p>
 
           <div className="mt-8 rounded-panel bg-card p-6 shadow-[1px_2px_2px_rgb(29_33_39/0.12),6px_12px_24px_-12px_rgb(29_33_39/0.25)]">
-            <p className="text-[31px] leading-none font-black">{work.price}</p>
+            <p className="text-[31px] leading-none font-serif font-semibold">{work.price}</p>
             {work.priceNote && <p className="mt-3 text-[14px] text-sub">{work.priceNote}</p>}
             <div className="mt-6 flex flex-col gap-3">
               {work.buyUrl && (
@@ -89,7 +89,7 @@ export function WorkDetail() {
             ))}
           </div>
 
-          <h2 className="mt-12 border-b-2 border-ink pb-2 text-[20px] font-black">できること</h2>
+          <h2 className="mt-12 border-b-2 border-ink pb-2 text-[20px] font-serif font-semibold">できること</h2>
           <ul>
             {work.features.map((f) => (
               <li key={f} className="border-b border-line py-3 text-[15px]">

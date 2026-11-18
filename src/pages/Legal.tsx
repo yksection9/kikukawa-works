@@ -23,7 +23,7 @@ export function Legal() {
   usePageTitle('特定商取引法に基づく表記')
   return (
     <div className="mx-auto max-w-3xl px-4 pt-10 sm:px-8 md:pt-16">
-      <h1 className="text-[25px] leading-snug font-black sm:text-[39px]">特定商取引法に基づく表記</h1>
+      <h1 className="text-[25px] leading-snug font-serif font-semibold sm:text-[39px]">特定商取引法に基づく表記</h1>
       <dl className="mt-8 overflow-hidden rounded-panel bg-card">
         {ROWS.map(([label, value]) => (
           <div key={label} className="flex flex-col gap-1 border-b border-line p-4 last:border-b-0 sm:flex-row sm:gap-6">
