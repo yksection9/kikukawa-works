@@ -71,7 +71,7 @@ export const WORKS: Work[] = [
       { src: '/works/thread-status/demo.webp', alt: 'Thread Status for Claude の実際の画面。プロジェクトごとに、入力待ち・作業中・完了のスレッド数が並ぶ' },
       { src: '/works/thread-status/demo2.webp', alt: 'プロジェクトを開いた画面。スレッドごとの状態と、次にあなたがすることが出る' },
     ],
-    url: '/tools/cc-window/install.html',
+    url: '/tools/cc-window/install',
     color: '#0b6b5f',
   },
   {
