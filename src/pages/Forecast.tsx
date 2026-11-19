@@ -284,7 +284,7 @@ export function Forecast() {
         <div className="mt-10 grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,27rem)] lg:gap-12">
           <div>
             <p className="inline-block rounded-full bg-fc-soft px-3 py-1 text-sm font-bold text-fc-accent">予測ツール ベータ版(無料)</p>
-            <h1 className="mt-4 text-[34px] leading-[1.3] font-black text-balance [word-break:auto-phrase] sm:text-[42px]">{c ? c.title : ALL.title}</h1>
+            <h1 className="mt-4 text-[34px] leading-[1.3] font-bold text-balance [word-break:auto-phrase] sm:text-[42px]">{c ? c.title : ALL.title}</h1>
             <p className="mt-5 max-w-[38em] text-[17px] leading-[1.85] text-fc-sub">{c ? c.lead : ALL.lead}</p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <a href={DEMO_URL(c ? (key as Industry) : 'restaurant')} className={primary}>テストデータで試す</a>

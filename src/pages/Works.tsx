@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { WorkRow } from '../components/WorkCard'
+import { WorkTile } from '../components/WorkCard'
 import { CATEGORY_LABEL, WORKS, type WorkCategory } from '../data/works'
 import { usePageTitle } from '../usePageTitle'
 
@@ -11,16 +11,16 @@ export function Works() {
   const list = filter === 'all' ? WORKS : WORKS.filter((w) => w.category === filter)
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pt-10 sm:px-8 md:pt-16">
-      <h1 className="text-[36px] font-black sm:text-[49px]">作品</h1>
-      <div className="mt-8 flex flex-wrap items-end justify-between gap-4 border-b-2 border-ink">
+    <div className="mx-auto max-w-6xl px-5 pt-12 sm:px-8 md:pt-16">
+      <h1 className="font-serif text-[36px] font-medium tracking-[0.04em] sm:text-[48px]">Works<span className="ml-4 align-middle font-sans text-[13px] tracking-[0.1em] text-sub">作品</span></h1>
+      <div className="mt-8 flex flex-wrap items-end justify-between gap-4 border-b border-line">
         <div className="flex gap-6" role="group" aria-label="種類で絞り込む">
           {FILTERS.map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
               aria-pressed={filter === f}
-              className={`-mb-0.5 min-h-11 border-b-4 text-[15px] font-bold transition-colors ${
+              className={`-mb-px min-h-11 border-b-2 text-[13px] tracking-[0.06em] transition-colors ${
                 filter === f ? 'border-ink text-ink' : 'border-transparent text-sub hover:text-ink'
               }`}
             >
@@ -28,12 +28,12 @@ export function Works() {
             </button>
           ))}
         </div>
-        <p className="pb-3 text-[14px] text-sub">{list.length}点</p>
+        <p className="pb-3 text-[12px] tracking-[0.06em] text-sub">{list.length} 点</p>
       </div>
       {list.length > 0 ? (
-        <ul>
+        <ul className="mt-10 grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
           {list.map((w) => (
-            <WorkRow key={w.slug} work={w} />
+            <WorkTile key={w.slug} work={w} />
           ))}
         </ul>
       ) : (

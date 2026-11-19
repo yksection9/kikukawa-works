@@ -15,7 +15,7 @@ export function Privacy() {
   usePageTitle('プライバシーポリシー')
   return (
     <div className="mx-auto max-w-3xl px-4 pt-10 sm:px-8 md:pt-16">
-      <h1 className="text-[25px] leading-snug font-black sm:text-[39px]">プライバシーポリシー</h1>
+      <h1 className="text-[25px] leading-snug font-serif font-semibold sm:text-[39px]">プライバシーポリシー</h1>
       <div className="mt-8 space-y-8 leading-relaxed">
         <Section title="このサイトで扱う情報">
           <p>このサイト自体は、会員登録やフォームによる個人情報の入力を求めていません。</p>

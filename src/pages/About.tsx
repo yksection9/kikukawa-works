@@ -5,7 +5,7 @@ export function About() {
   usePageTitle('つくり手')
   return (
     <div className="mx-auto max-w-2xl px-4 pt-10 sm:px-8 md:pt-16">
-      <h1 className="text-[36px] font-black sm:text-[49px]">つくり手</h1>
+      <h1 className="text-[36px] font-serif font-semibold sm:text-[49px]">つくり手</h1>
       <div className="mt-8 space-y-5 leading-relaxed">
         <p>
           {SELLER.brand} は、私が個人で運営しているお店です。

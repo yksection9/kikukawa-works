@@ -1,27 +1,40 @@
 import { Link } from 'react-router-dom'
 import { CATEGORY_LABEL, type Work } from '../data/works'
 
-/** 作品目録の1行。カードにせず、目録として横に並べる */
-export function WorkRow({ work }: { work: Work }) {
+/**
+ * 作品の1点。暗い額に作品の画像を置き、下に明朝の題名を添える(画廊の作品と名札のように)。
+ * 写真の作品は額いっぱいに、画面の画像(ツール)は額の中に余白をとって浮かせる。
+ */
+export function WorkTile({ work }: { work: Work }) {
+  const image = work.images[0]
+  const isScreen = work.category === 'tool'
+
   return (
-    <li className="border-b border-line">
-      <Link
-        to={`/works/${work.slug}`}
-        className="group grid grid-cols-[72px_1fr] items-center gap-x-5 gap-y-1 py-4 sm:py-6 sm:grid-cols-[112px_1fr_auto] sm:gap-x-8"
-      >
-        <img
-          src={work.images[0].src}
-          alt=""
-          className="row-span-2 aspect-[4/5] w-full rounded-thumb object-cover sm:row-span-1"
-        />
-        <div className="min-w-0">
-          <p className="text-[13px] font-bold text-sub">{CATEGORY_LABEL[work.category]}</p>
-          <h3 className="text-[20px] leading-snug font-black underline-offset-4 group-hover:underline sm:text-[25px]">
-            {work.title}
-          </h3>
-          <p className="mt-1 text-[15px] text-sub">{work.tagline}</p>
+    <li>
+      <Link to={`/works/${work.slug}`} className="group block">
+        <div className="relative aspect-[4/5] overflow-hidden rounded-frame bg-night">
+          {isScreen ? (
+            <div className="absolute inset-0 flex items-center justify-center p-[9%]">
+              <img
+                src={image.src}
+                alt={image.alt}
+                className="max-h-full w-full rounded-[3px] object-contain shadow-[0_24px_40px_-12px_rgba(0,0,0,0.85)] transition-transform duration-500 group-hover:scale-[1.02]"
+              />
+            </div>
+          ) : (
+            <img
+              src={image.src}
+              alt={image.alt}
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            />
+          )}
+          <span className="absolute left-4 top-3 text-[11px] tracking-[0.12em] text-night-sub">
+            {CATEGORY_LABEL[work.category]}
+          </span>
         </div>
-        <p className="col-start-2 text-[15px] font-bold sm:col-start-3 sm:text-[16px]">{work.price}</p>
+        <h3 className="mt-4 font-serif text-[21px] font-semibold leading-snug">{work.title}</h3>
+        <p className="mt-1 text-[14px] text-sub">{work.tagline}</p>
+        <p className="mt-2 text-[13px] tracking-[0.04em]">{work.price}</p>
       </Link>
     </li>
   )
