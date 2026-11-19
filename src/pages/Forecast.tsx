@@ -163,7 +163,7 @@ const fmt = (n: number) => n.toLocaleString('ja-JP')
 
 function ForecastSheet({ sheet, score }: { sheet: Sheet; score: Score }) {
   return (
-    <figure className="min-w-0 rounded-xl border border-fc-line bg-white shadow-[0_16px_32px_-20px_rgba(29,36,34,0.35)]">
+    <figure className="min-w-0 rounded-[2px] border border-fc-line bg-card shadow-[0_20px_40px_-26px_rgba(26,24,22,0.5)]">
       <figcaption className="flex items-baseline justify-between gap-3 border-b border-fc-line px-4 py-3">
         <span className="font-bold">来週の予想</span>
         <span className="text-xs text-fc-sub">テストデータ</span>
@@ -249,7 +249,7 @@ function ScoreBars({ scores }: { scores: Score[] }) {
 function Section({ title, children, id }: { title: string; children: ReactNode; id?: string }) {
   return (
     <section id={id} className="mt-16 scroll-mt-6 border-t border-fc-line pt-8 sm:mt-20">
-      <h2 className="text-[21px] font-bold sm:text-[27px]">{title}</h2>
+      <h2 className="font-serif text-[22px] font-semibold tracking-[0.02em] sm:text-[28px]">{title}</h2>
       <div className="mt-5">{children}</div>
     </section>
   )
@@ -267,9 +267,10 @@ export function Forecast() {
   const label = c ? c.label : '業種'
   const mailSubject = encodeURIComponent(`無料予測の申し込み(${label})`)
   const tab = ({ isActive }: { isActive: boolean }) =>
-    `rounded-full border px-4 py-2 text-sm transition-colors ${isActive ? 'border-fc-accent bg-fc-soft font-bold text-fc-accent' : 'border-fc-line text-fc-sub hover:text-fc-ink'}`
-  const primary = 'rounded-lg bg-fc-accent px-6 py-3.5 text-center font-bold text-white transition-colors hover:bg-fc-accent-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fc-accent'
-  const secondary = 'rounded-lg border border-fc-ink px-6 py-3.5 text-center font-bold transition-colors hover:border-fc-accent hover:text-fc-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fc-accent'
+    `rounded-full border px-4 py-2 text-sm tracking-[0.04em] transition-colors ${isActive ? 'border-fc-ink bg-fc-ink font-medium text-night-fg' : 'border-fc-line text-fc-sub hover:border-fc-ink hover:text-fc-ink'}`
+  // ボタンはサイト共通の形(丸い墨のボタンと線のボタン)
+  const primary = 'btn btn-solid'
+  const secondary = 'btn btn-line'
 
   return (
     <div className="bg-fc-paper font-fc text-fc-ink">
@@ -283,8 +284,8 @@ export function Forecast() {
 
         <div className="mt-10 grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,27rem)] lg:gap-12">
           <div>
-            <p className="inline-block rounded-full bg-fc-soft px-3 py-1 text-sm font-bold text-fc-accent">予測ツール ベータ版(無料)</p>
-            <h1 className="mt-4 text-[34px] leading-[1.3] font-bold text-balance [word-break:auto-phrase] sm:text-[42px]">{c ? c.title : ALL.title}</h1>
+            <p className="inline-block border-b border-fc-accent pb-1 text-[13px] font-medium tracking-[0.12em] text-fc-accent">予測ツール ベータ版(無料)</p>
+            <h1 className="mt-5 font-serif text-[32px] leading-[1.4] font-semibold text-balance [word-break:auto-phrase] sm:text-[40px]">{c ? c.title : ALL.title}</h1>
             <p className="mt-5 max-w-[38em] text-[17px] leading-[1.85] text-fc-sub">{c ? c.lead : ALL.lead}</p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <a href={DEMO_URL(c ? (key as Industry) : 'restaurant')} className={primary}>テストデータで試す</a>
@@ -332,7 +333,7 @@ export function Forecast() {
               {INDUSTRIES.map((ind) => (
                 <li key={ind} className="flex flex-col gap-2 py-5 first:pt-0 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
                   <div>
-                    <Link to={`/forecast/${ind}`} className="text-[21px] font-bold hover:text-fc-accent">{COPY[ind].label}</Link>
+                    <Link to={`/forecast/${ind}`} className="font-serif text-[22px] font-semibold hover:text-fc-accent">{COPY[ind].label}</Link>
                     <p className="mt-1 text-fc-sub">{ALL.pick[ind]}</p>
                   </div>
                   <a href={DEMO_URL(ind)} className="shrink-0 font-bold text-fc-accent underline-offset-4 hover:underline">
@@ -370,15 +371,15 @@ export function Forecast() {
               '「この予想、信じていい?」で、いつものやり方と外れ方を比べてから使います。',
             ].map((s, i) => (
               <li key={s} className="flex gap-4">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-fc-accent font-bold text-fc-accent tabular-nums">{i + 1}</span>
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-fc-accent font-serif text-[18px] font-semibold text-fc-accent">{i + 1}</span>
                 <span className="pt-0.5 leading-[1.85]">{s}</span>
               </li>
             ))}
           </ol>
         </Section>
 
-        <section id="apply" className="mt-16 scroll-mt-6 rounded-xl bg-fc-ink p-6 text-white sm:mt-20 sm:p-8">
-          <h2 className="text-[21px] font-bold sm:text-[27px]">無料で予測してもらう</h2>
+        <section id="apply" className="mt-16 scroll-mt-6 rounded-[2px] bg-night p-6 text-night-fg sm:mt-20 sm:p-10">
+          <h2 className="font-serif text-[22px] font-semibold tracking-[0.02em] sm:text-[28px]">無料で予測してもらう</h2>
           <div className="mt-4 max-w-[38em] space-y-3 leading-[1.85] text-white/85">
             <p>
               あなたのお店・センター・倉庫の記録で、1回無料で予測します(先着: 飲食店10店・コールセンター5社・物流5社)。
@@ -388,7 +389,7 @@ export function Forecast() {
           </div>
           <a
             href={`mailto:${SELLER.email}?subject=${mailSubject}`}
-            className="mt-6 inline-block rounded-lg bg-white px-6 py-3.5 font-bold text-fc-ink transition-colors hover:bg-fc-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="mt-7 inline-flex min-h-12 items-center rounded-full bg-champagne px-7 text-[14px] font-medium tracking-[0.05em] text-night transition-colors hover:bg-night-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-night-fg"
           >
             メールで申し込む
           </a>

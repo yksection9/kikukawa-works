@@ -9,7 +9,8 @@
 <title>コールセンター予測ツール</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=IBM+Plex+Sans+JP:wght@400;500;700&family=Shippori+Mincho+B1:wght@500;600&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=IBM+Plex+Sans+JP:wght@400;500;700&family=Shippori+Mincho+B1:wght@500;600&display=swap"></noscript>
 <style>
 /* かんたん表示: 上から順に ①データ → ②予測 → ③当たり具合 → 詳しい設定(たたんである)。文字とボタンは大きく、言葉は日常語に */
 :root {
@@ -253,11 +254,70 @@ details.fold > .in { display: grid; gap: 14px; padding: 4px 14px 16px; }
   .table-wrap { overflow: visible; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* 2026-11-19 サイト(kikukawaworks.com)と同じエディトリアル調にそろえる。色・字・角だけを上書きし、並びと動きは変えない */
+:root {
+  --bg: #eeece8; --panel: #f7f6f3; --ink: #1a1816; --muted: #5f5a54; --line: #d3cec6;
+  --accent: #7a5a36; --accent-soft: #ebe3d6; --actual: #1a1816; --tune: #a8742a; --tune-bg: rgba(168,116,42,.12);
+  --check: #4b6a8a; --check-bg: rgba(75,106,138,.10); --good: #2f6b45; --good-soft: #e3ebe2; --warn: #8f5a1a; --warn-soft: #f2e8d8;
+  --bad: #a3322a; --bad-soft: #f3e1dd; --sat: #3a5a8c; --sun: #a3322a; --chip: #e4e0d9;
+  --btn: #1a1816; --btn-fg: #f3eee6; --hero-bg: #0f0d0b; --hero-line: #0f0d0b;
+  --font-body: "IBM Plex Sans JP", "Hiragino Sans", "Yu Gothic", "Meiryo", system-ui, sans-serif;
+  --font-serif: "Cormorant Garamond", "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho", serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f0d0b; --panel: #191613; --ink: #ede6da; --muted: #a39a8e; --line: #2e2924;
+    --accent: #dccbad; --accent-soft: #29231b; --actual: #ede6da; --tune: #d9a55a; --tune-bg: rgba(217,165,90,.14);
+    --check: #8fa9c8; --check-bg: rgba(143,169,200,.13); --good: #8cc49b; --good-soft: #16201a; --warn: #e0ac6a; --warn-soft: #2a2115;
+    --bad: #e98a7e; --bad-soft: #2c1815; --sat: #9db4dc; --sun: #e98a7e; --chip: #24201b;
+    --btn: #dccbad; --btn-fg: #0f0d0b; --hero-bg: #191613; --hero-line: #2e2924;
+  }
+}
+:root[data-theme="dark"] {
+    --bg: #0f0d0b; --panel: #191613; --ink: #ede6da; --muted: #a39a8e; --line: #2e2924;
+    --accent: #dccbad; --accent-soft: #29231b; --actual: #ede6da; --tune: #d9a55a; --tune-bg: rgba(217,165,90,.14);
+    --check: #8fa9c8; --check-bg: rgba(143,169,200,.13); --good: #8cc49b; --good-soft: #16201a; --warn: #e0ac6a; --warn-soft: #2a2115;
+    --bad: #e98a7e; --bad-soft: #2c1815; --sat: #9db4dc; --sun: #e98a7e; --chip: #24201b;
+    --btn: #dccbad; --btn-fg: #0f0d0b; --hero-bg: #191613; --hero-line: #2e2924;
+}
+.kw-bar { background: #0f0d0b; border-bottom: 1px solid var(--hero-line); padding: 15px max(16px, env(safe-area-inset-left, 0px)); }
+.kw-bar a { color: #ede6da; text-decoration: none; font-family: var(--font-serif); font-size: 14px; font-weight: 600; letter-spacing: .22em; }
+h1 { font-family: var(--font-serif); font-weight: 600; letter-spacing: .03em; }
+.badge { background: none; border: 1px solid var(--accent); color: var(--accent); font-size: 13px; font-weight: 500; letter-spacing: .08em; }
+.toplinks a { color: var(--ink); text-underline-offset: 4px; }
+.card { border-radius: 3px; }
+.step { font-family: var(--font-serif); font-weight: 600; letter-spacing: .02em; }
+.step b { background: none; border: 1px solid var(--accent); color: var(--accent); font-family: var(--font-serif); font-weight: 600; font-size: 20px; font-variant-numeric: lining-nums; }
+details.card > summary { font-family: var(--font-serif); font-weight: 600; letter-spacing: .02em; }
+details.card > summary::after, details.fold > summary::after { font-family: var(--font-body); color: var(--ink); }
+button, .filebtn { border-radius: 3px; border-width: 1px; }
+button:hover, .filebtn:hover { border-color: var(--ink); }
+button.primary { background: var(--btn); border-color: var(--btn); color: var(--btn-fg); font-weight: 500; letter-spacing: .05em; }
+.choices button[aria-pressed=true], .ranges button[aria-pressed=true] { border-color: var(--ink); background: var(--accent-soft); color: var(--ink); }
+.filebtn.dragging { border-width: 2px; }
+input[type=number], input[type=time], input[type=date], select, .menu-row input[type=text], .step-row input[type=text] { border-radius: 3px; border-width: 1px; }
+.check { border-width: 1px; }
+.box, .colrow, .step-row, .day, .score, details.fold, .now, .notice, .err, .verdict { border-radius: 3px; }
+.box.ours { border-width: 1px; border-color: var(--accent); }
+.score { border-top-width: 2px; }
+.track, .track i { border-radius: 1px; height: 10px; }
+.track { height: 10px; }
+.bar div { border-radius: 1px; }
+.hero { --ink: #ede6da; --muted: #a39a8e; --accent: #dccbad; background: var(--hero-bg); border: 1px solid var(--hero-line); color: var(--ink); border-radius: 3px; padding: 26px 20px; }
+.hero .when { font-weight: 500; letter-spacing: .04em; }
+.hero .num { font-family: var(--font-serif); font-weight: 600; font-size: 72px; font-variant-numeric: lining-nums tabular-nums; }
+.hero .num small { font-family: var(--font-body); font-size: 22px; font-weight: 500; }
+.cmp .pct, .score .big, .box .big2 { font-family: var(--font-serif); font-weight: 600; font-variant-numeric: lining-nums tabular-nums; }
+.cmp .pct { font-size: 34px; }
+.score .big { font-size: 30px; }
+@media print { .kw-bar { display: none; } .hero { background: none; color: #000; } }
 </style>
 </head>
 <body>
 
 
+<div class="kw-bar noprint"><a href="/">KIKUKAWA WORKS</a></div>
 <div class="wrap">
   <header>
     <div class="topline">
