@@ -45,10 +45,10 @@ export const WORKS: Work[] = [
     price: '無料(ベータ版)',
     priceNote: '正式版は有料の予定です。紹介ページから無料予測も申し込めます',
     images: [
-      { src: '/works/forecast/demo.webp', alt: '予測ツールの画面。実績と予測のグラフと、調整用のスライダー' },
+      { src: '/works/forecast/demo.webp', alt: '予測ツールの画面(テストデータ)。明日の来客数の予想と1週間分の予想、必要なスタッフの人数' },
     ],
     url: '/forecast',
-    color: '#0b6b5f',
+    // 11-19 サイトの墨色にそろえた(旧 #0b6b5f の緑)
   },
   {
     slug: 'thread-status',
@@ -72,7 +72,7 @@ export const WORKS: Work[] = [
       { src: '/works/thread-status/demo2.webp', alt: 'プロジェクトを開いた画面。スレッドごとの状態と、次にあなたがすることが出る' },
     ],
     url: '/tools/cc-window/install',
-    color: '#0b6b5f',
+    // 11-19 サイトの墨色にそろえた(旧 #0b6b5f の緑)
   },
   {
     slug: 'whisky-collection',

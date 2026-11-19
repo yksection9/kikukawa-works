@@ -23,17 +23,17 @@
   --radius-button: 999px;
   --radius-panel: 12px;
 
-  /* 予測ツールの紹介ページ(道具の画面と同じ色と字) */
-  --color-fc-paper: #f6f4ef;
-  --color-fc-ink: #1d2422;
-  --color-fc-sub: #55615c;
-  --color-fc-line: #d8dcd6;
-  --color-fc-accent: #0b6b5f;
-  --color-fc-accent-deep: #08524a;
-  --color-fc-soft: #e3f1ee;
-  --color-fc-base: #a7afab;
-  --color-fc-sat: #2f5fb8;
-  --color-fc-sun: #c0392b;
+  /* 予測ツールの紹介ページ(道具の画面と同じ色と字)。11-19 サイトと同じ黒・生成り・ブロンズにそろえた */
+  --color-fc-paper: #eeece8;
+  --color-fc-ink: #1a1816;
+  --color-fc-sub: #5f5a54;
+  --color-fc-line: #d3cec6;
+  --color-fc-accent: #7a5a36;
+  --color-fc-accent-deep: #5e4428;
+  --color-fc-soft: #ebe3d6;
+  --color-fc-base: #b1aaa0;
+  --color-fc-sat: #3a5a8c;
+  --color-fc-sun: #a3322a;
   --font-fc: 'IBM Plex Sans JP', 'Hiragino Sans', 'Yu Gothic', sans-serif;
 }
 
