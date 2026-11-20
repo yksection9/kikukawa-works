@@ -60,7 +60,7 @@ export function Diagnosis({ id = 'diagnosis' }: { id?: string }) {
         {SELLER.email}(件名: {DIAGNOSIS_SUBJECT})
       </p>
       <p className="mt-5 max-w-[38em] text-sm leading-[1.85] text-white/70">
-        いただいたCSVは報告書を作るためだけに使い、報告書をお送りしたあと削除します。センター名を外に出すことはありません。
+        いただいたCSVは報告書を作るためだけに使い、報告書をお送りしたあと、受け取ったメールごと削除します。センター名を外に出すことはありません。
         データを社外に出せない場合は、画面を一緒に見ながら、お手元のブラウザで予測することもできます。メールでご相談ください。
       </p>
     </section>
