@@ -47,6 +47,9 @@ export function Privacy() {
             予測ツール(/tools/forecast/)に入れたCSVは、お使いのブラウザの中だけで計算します。
             CSVの中身が当サイトや他のサーバーに送られることはなく、保存もしません。
           </p>
+          <p>
+            「無料の入電予測診断」でメールに添付いただいたCSVは、報告書を作るためだけに使い、報告書をお送りしたあと、受け取ったメールごと削除します。
+          </p>
         </Section>
         <Section title="お問い合わせ">
           <p>
@@ -55,7 +58,7 @@ export function Privacy() {
             までご連絡ください。
           </p>
         </Section>
-        <p className="text-sm text-sub">制定日: 2026年10月22日 / 改定日: 2026年10月25日(アクセス解析を追加)</p>
+        <p className="text-sm text-sub">制定日: 2026年10月22日 / 改定日: 2026年11月20日(入電予測診断のCSVの扱いを追加)</p>
       </div>
     </div>
   )

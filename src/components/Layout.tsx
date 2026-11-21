@@ -34,6 +34,7 @@ export function Layout() {
         <div className="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-12 sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <p className="font-serif text-[18px] font-semibold uppercase tracking-[0.22em] text-night-fg">{SELLER.brand}</p>
           <div className="flex flex-wrap gap-x-6 gap-y-3">
+            <Link to="/tools/erlang-c" className="hover:text-night-fg">コールセンターの必要人数計算(アーランC)</Link>
             <a href="/tools/cc-window/install" className="hover:text-night-fg">Thread Status for Claude(無料・非公式)</a>
             <Link to="/legal" className="hover:text-night-fg">特定商取引法に基づく表記</Link>
             <Link to="/privacy" className="hover:text-night-fg">プライバシーポリシー</Link>
