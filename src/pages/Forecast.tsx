@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link, NavLink, useParams } from 'react-router-dom'
+import { Diagnosis } from '../components/Diagnosis'
 import { SELLER } from '../data/seller'
 import { usePageTitle } from '../usePageTitle'
 import { NotFound } from './NotFound'
@@ -154,7 +155,7 @@ const ALL = {
 }
 
 const SAFE = [
-  { title: 'データは送りません', body: '計算はあなたのパソコン(スマホ)のブラウザの中だけで行います。記録のファイルが、このサイトやほかのサーバーに送られることはありません。' },
+  { title: 'ツールはデータを送りません', body: '計算はあなたのパソコン(スマホ)のブラウザの中だけで行います。記録のファイルが、このサイトやほかのサーバーに送られることはありません。' },
   { title: '日別の記録だけで使えます', body: '日付と数の2列があれば使えます。予約数・キャンペーンなど、前もって分かる数の列があれば、もっと当たります。' },
   { title: '当たり具合を先に確かめられます', body: '過去の1日ずつについて、その日より前の記録だけで予想し直し、実際の数と答え合わせします。未来の記録は使いません。' },
 ]
@@ -289,7 +290,7 @@ export function Forecast() {
             <p className="mt-5 max-w-[38em] text-[17px] leading-[1.85] text-fc-sub">{c ? c.lead : ALL.lead}</p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <a href={DEMO_URL(c ? (key as Industry) : 'restaurant')} className={primary}>テストデータで試す</a>
-              <a href="#apply" className={secondary}>無料で予測してもらう</a>
+              <a href="#apply" className={secondary}>{key === 'callcenter' ? '無料の診断を申し込む' : '無料で予測してもらう'}</a>
             </div>
           </div>
           <ForecastSheet sheet={shown.sheet} score={shown.scores[0]} />
@@ -317,6 +318,13 @@ export function Forecast() {
                   </div>
                 ))}
               </dl>
+              {key === 'callcenter' && (
+                <p className="mt-6 leading-[1.85]">
+                  必要人数の計算だけを先に試すなら、入電数と平均処理時間を入れるだけの{' '}
+                  <Link to="/tools/erlang-c" className="font-bold text-fc-accent underline underline-offset-4">必要人数計算(アーランC)</Link>
+                  {' '}も無料で使えます。
+                </p>
+              )}
             </Section>
 
             <Section title="テストデータでの当たり具合">
@@ -378,23 +386,27 @@ export function Forecast() {
           </ol>
         </Section>
 
-        <section id="apply" className="mt-16 scroll-mt-6 rounded-[2px] bg-night p-6 text-night-fg sm:mt-20 sm:p-10">
-          <h2 className="font-serif text-[22px] font-semibold tracking-[0.02em] sm:text-[28px]">無料で予測してもらう</h2>
-          <div className="mt-4 max-w-[38em] space-y-3 leading-[1.85] text-white/85">
-            <p>
-              あなたのお店・センター・倉庫の記録で、1回無料で予測します(先着: 飲食店10店・コールセンター5社・物流5社)。
-              データを送っていただく必要はありません。画面を一緒に見ながら、お手元のブラウザで進めます。
-            </p>
-            <p>メールに、業種と、手元にある記録のおおよその期間(例: 2024年4月から日別)を書いてお送りください。</p>
-          </div>
-          <a
-            href={`mailto:${SELLER.email}?subject=${mailSubject}`}
-            className="mt-7 inline-flex min-h-12 items-center rounded-full bg-champagne px-7 text-[14px] font-medium tracking-[0.05em] text-night transition-colors hover:bg-night-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-night-fg"
-          >
-            メールで申し込む
-          </a>
-          <p className="mt-3 text-sm break-all text-white/70">{SELLER.email}(件名の例: 無料予測の申し込み({c ? c.label : '飲食店'}))</p>
-        </section>
+        {key === 'callcenter' ? (
+          <Diagnosis id="apply" />
+        ) : (
+          <section id="apply" className="mt-16 scroll-mt-6 rounded-[2px] bg-night p-6 text-night-fg sm:mt-20 sm:p-10">
+            <h2 className="font-serif text-[22px] font-semibold tracking-[0.02em] sm:text-[28px]">無料で予測してもらう</h2>
+            <div className="mt-4 max-w-[38em] space-y-3 leading-[1.85] text-white/85">
+              <p>
+                あなたのお店・センター・倉庫の記録で、1回無料で予測します(先着: 飲食店10店・コールセンター5社・物流5社)。
+                データを送っていただく必要はありません。画面を一緒に見ながら、お手元のブラウザで進めます。
+              </p>
+              <p>メールに、業種と、手元にある記録のおおよその期間(例: 2024年4月から日別)を書いてお送りください。</p>
+            </div>
+            <a
+              href={`mailto:${SELLER.email}?subject=${mailSubject}`}
+              className="mt-7 inline-flex min-h-12 items-center rounded-full bg-champagne px-7 text-[14px] font-medium tracking-[0.05em] text-night transition-colors hover:bg-night-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-night-fg"
+            >
+              メールで申し込む
+            </a>
+            <p className="mt-3 text-sm break-all text-white/70">{SELLER.email}(件名の例: 無料予測の申し込み({c ? c.label : '飲食店'}))</p>
+          </section>
+        )}
 
         <section className="mt-16 text-sm leading-relaxed text-fc-sub">
           <h2 className="font-bold text-fc-ink">ご利用にあたって</h2>

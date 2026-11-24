@@ -96,6 +96,35 @@ const forecastPages: SeoPage[] = [
   },
 ].map((p) => ({ ...p, image: FORECAST_IMAGE }))
 
+// 無料の計算ページ(予測ツールへの検索の入口。kikukawa-growth/PLAN.md §4.5)
+const toolPages: SeoPage[] = [
+  {
+    path: '/tools/erlang-c',
+    title: `コールセンターの必要人数計算(アーランC・無料)| ${SELLER.brand}`,
+    description: '30分あたりの入電数・平均処理時間・応答率の目標(例: 20秒以内に80%)から、電話を受けるのに必要な人数とシフト人数をアーランCで計算する無料ツール。人数を1人増減したときの応答率と待ち時間も一覧で見られます。',
+    image: FORECAST_IMAGE,
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebApplication',
+        name: 'コールセンターの必要人数計算(アーランC)',
+        url: `${SITE_URL}/tools/erlang-c`,
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'Web',
+        inLanguage: 'ja',
+        author: person,
+        offers: { '@type': 'Offer', price: '0', priceCurrency: 'JPY' },
+      },
+      breadcrumb([
+        { name: 'ホーム', path: '/' },
+        { name: '予測ツール', path: '/forecast' },
+        { name: 'コールセンター', path: '/forecast/callcenter' },
+        { name: '必要人数計算(アーランC)', path: '/tools/erlang-c' },
+      ]),
+    ],
+  },
+]
+
 export const SEO_PAGES: SeoPage[] = [
   {
     path: '/',
@@ -113,6 +142,7 @@ export const SEO_PAGES: SeoPage[] = [
   },
   ...workPages,
   ...forecastPages,
+  ...toolPages,
   {
     path: '/about',
     title: `つくり手 | ${SELLER.brand}`,

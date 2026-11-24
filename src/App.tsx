@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 import { Layout } from './components/Layout'
 import { About } from './pages/About'
+import { ErlangC } from './pages/ErlangC'
 import { Forecast } from './pages/Forecast'
 import { Home } from './pages/Home'
 import { Legal } from './pages/Legal'
@@ -18,6 +19,7 @@ export function App() {
         <Route path="/works/:slug" element={<WorkDetail />} />
         <Route path="/forecast" element={<Forecast />} />
         <Route path="/forecast/:industry" element={<Forecast />} />
+        <Route path="/tools/erlang-c" element={<ErlangC />} />
         <Route path="/about" element={<About />} />
         <Route path="/legal" element={<Legal />} />
         <Route path="/privacy" element={<Privacy />} />
