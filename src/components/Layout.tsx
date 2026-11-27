@@ -49,7 +49,8 @@ export function Layout() {
             <a href={`mailto:${SELLER.email}`} className="hover:text-night-fg">お問い合わせ</a>
           </div>
         </div>
-        <p className="mx-auto max-w-6xl px-5 pb-8 text-[12px] sm:px-8">
+        {/* 年はビルドした年と開いた年で変わりうる(本文は prerender で書き出すため)。食い違いの警告を出さない */}
+        <p suppressHydrationWarning className="mx-auto max-w-6xl px-5 pb-8 text-[12px] sm:px-8">
           © {new Date().getFullYear()} {SELLER.brand}
         </p>
       </footer>
