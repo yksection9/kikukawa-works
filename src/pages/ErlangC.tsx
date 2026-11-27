@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { Diagnosis } from '../components/Diagnosis'
+import { ERLANG_FAQ as FAQ } from '../data/erlangFaq'
 import { erlangC, inputError, type ErlangInput } from '../lib/erlang'
 import { usePageTitle } from '../usePageTitle'
 
@@ -54,24 +55,15 @@ function NumField({
   )
 }
 
-const FAQ = [
-  {
-    q: '1時間あたりの入電数しか分からないときは?',
-    a: '区切りを「60分」にして、そのまま入れてください。15分ごとの数があれば「15分」で計算すると、山の時間帯に合った人数になります。',
-  },
-  {
-    q: '平均処理時間に、後処理(ACW)は入れますか?',
-    a: '入れてください。電話を切ったあとの入力・メモの時間も、その間は次の電話に出られないためです。保留の時間も含めます。',
-  },
-  {
-    q: '目標の「20秒以内に80%」はどこから来ていますか?',
-    a: 'コールセンターでよく使われる目安です。センターの決まり(例: 30秒以内に90%)があれば、それに合わせて変えてください。',
-  },
-  {
-    q: '途中で切られる電話(放棄呼)は考えますか?',
-    a: 'アーランCは、待っているお客様が途中で切らない前提の計算です。実際には切られる電話があるため、出てくる人数はやや多めになります。安全側の目安として使ってください。',
-  },
-]
+// 無料の入電予測診断への案内(冒頭と計算結果の下)。申込の欄はページの最後(#diagnosis)にある。
+// スマホでは申込が約6,300px 先にしかなかったため、上の2か所から飛べるようにした(kikukawa-growth/PLAN.md §5)。
+function DiagnosisLink({ children }: { children: ReactNode }) {
+  return (
+    <a href="#diagnosis" className="font-bold text-fc-accent underline underline-offset-4 hover:text-fc-ink">
+      {children}
+    </a>
+  )
+}
 
 export function ErlangC() {
   usePageTitle('コールセンターの必要人数計算(アーランC)')
@@ -109,6 +101,11 @@ export function ErlangC() {
         </h1>
         <p className="mt-5 max-w-[38em] text-[17px] leading-[1.85] text-fc-sub">
           入電数と1件の平均処理時間、応答率の目標を入れると、電話を受けるのに何人いればよいかを、コールセンターで広く使われる計算(アーランC)で出します。無料・登録なしで使えます。計算はブラウザの中だけで行い、入れた数はどこにも送りません。
+        </p>
+        <p className="mt-4 max-w-[38em] border-l-2 border-fc-accent pl-4 text-[15px] leading-[1.85]">
+          コールセンター・BPOの方へ: 日別の入電数のCSVを送るだけで、来週の入電数の予想と日ごとの必要人数を報告書にしてお返しする
+          <DiagnosisLink>無料の入電予測診断</DiagnosisLink>
+          も受け付けています(先着5社)。
         </p>
 
         <div className="mt-10 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)] lg:gap-12">
@@ -195,6 +192,16 @@ export function ErlangC() {
               </>
             )}
           </figure>
+        </div>
+
+        <div className="mt-8 flex flex-col gap-4 rounded-[2px] border border-fc-line bg-fc-soft/60 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <p className="max-w-[36em] leading-[1.8]">
+            <span className="font-bold">この人数を、来週の入電の予想から出しませんか。</span>
+            <span className="block text-[15px] text-fc-sub">
+              日別の入電数のCSVを送るだけで、予想の当たり具合と日ごとの必要人数を報告書1枚にしてお返しします。無料・先着5社・打ち合わせなし。
+            </span>
+          </p>
+          <a href="#diagnosis" className="btn btn-solid shrink-0">無料の診断を見る</a>
         </div>
 
         {res && r && (

@@ -3,8 +3,14 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { SELLER } from '../data/seller'
 
 export function Layout() {
-  const { pathname } = useLocation()
-  useEffect(() => window.scrollTo(0, 0), [pathname])
+  const { pathname, hash } = useLocation()
+  // ページが変わったら先頭へ。ただし #diagnosis のような行き先があれば、そこへ送る
+  // (前はいつも先頭へ戻していたため、/forecast/callcenter#apply などの案内が申込の欄に届かなかった)
+  useEffect(() => {
+    const target = hash ? document.getElementById(decodeURIComponent(hash.slice(1))) : null
+    if (target) target.scrollIntoView()
+    else window.scrollTo(0, 0)
+  }, [pathname, hash])
 
   const nav = ({ isActive }: { isActive: boolean }) =>
     `flex min-h-11 items-center text-[13px] tracking-[0.08em] transition-colors ${
@@ -15,12 +21,14 @@ export function Layout() {
     <div className="flex min-h-screen flex-col">
       {/* 上の帯は暗い地。トップでは冒頭の暗い面とつながる */}
       <header className="bg-night text-night-fg">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3 sm:px-8">
-          <Link to="/" className="font-serif text-[17px] font-semibold uppercase tracking-[0.22em]">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-3 sm:px-8">
+          <Link to="/" className="font-serif text-[15px] font-semibold uppercase tracking-[0.16em] whitespace-nowrap sm:text-[17px] sm:tracking-[0.22em]">
             {SELLER.brand}
           </Link>
-          <nav className="flex gap-6">
+          <nav className="flex gap-4 whitespace-nowrap sm:gap-6">
             <NavLink to="/works" className={nav}>作品</NavLink>
+            {/* 法人(コールセンター)の入口。無料の入電予測診断の欄へ直接送る */}
+            <Link to="/tools/erlang-c#diagnosis" className={nav({ isActive: false })}>法人向け</Link>
             <NavLink to="/about" className={nav}>つくり手</NavLink>
           </nav>
         </div>
