@@ -22,6 +22,8 @@ React + Vite + Tailwind CSS v4 の静的サイトで、Cloudflare Pages で公�
 `npm run build` のあと、`vite.config.ts` の `seo-pages` が `src/data/seo.ts` を読み、ページごとの HTML(`dist/works.html` など)と `dist/sitemap.xml` を書き出す。
 作品以外のページ(予測ツールの業種ページなど)を足したときは `SEO_PAGES` に1件足す。
 
+そのあと `scripts/prerender.mjs` が、同じページの本文を React で描いて HTML に入れる(検索エンジンが JavaScript を動かさなくても本文を読めるように)。ブラウザでは `src/main.tsx` が `hydrateRoot` で引き継ぐ。描画中に `window`・`document` を触る部品を足すと、ここでビルドが止まるので `useEffect` の中で触る。
+
 販売者情報(特商法表記・連絡先)は `src/data/seller.ts` にまとめてある。
 
 ## Cloudflare Pages の設定

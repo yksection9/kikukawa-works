@@ -47,6 +47,16 @@ export function Home() {
             <WorkTile key={w.slug} work={w} />
           ))}
         </ul>
+        {/* 法人(コールセンター)の入口を1行だけ。サイトは作り替えない(kikukawa-growth/PLAN.md §5) */}
+        <p className="mt-14 border-t border-line pt-6 text-[14px] leading-relaxed text-sub">
+          <span className="font-medium text-ink">コールセンター・BPOの方へ</span>
+          <span className="mx-2" aria-hidden="true">—</span>
+          日別の入電数のCSVを送るだけで、来週の入電数と必要人数を報告書にしてお返しする{' '}
+          <Link to="/tools/erlang-c#diagnosis" className="font-medium text-ink underline underline-offset-4 hover:text-sub">
+            無料の入電予測診断
+          </Link>
+          を受け付けています(先着5社)。
+        </p>
       </section>
     </div>
   )

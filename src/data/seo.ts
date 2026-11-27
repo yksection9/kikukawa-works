@@ -1,6 +1,7 @@
 // 検索エンジンとSNS(X・LINEなど)向けのページ情報。
 // ビルドのとき vite.config.ts がこれを読み、ページごとの HTML(タイトル・説明文・OGP・構造化データ)と sitemap.xml を書き出す。
 // 作品ページは works.ts から自動で作るので、作品を足したときにここを触る必要はない。
+import { ERLANG_FAQ } from './erlangFaq.ts'
 import { SELLER } from './seller.ts'
 import { WORKS } from './works.ts'
 
@@ -73,6 +74,9 @@ const workPages: SeoPage[] = WORKS.map((w) => ({
 }))
 
 const FORECAST_IMAGE = '/works/forecast/demo.webp'
+// コールセンター向けのページを SNS で共有したときの画像(必要人数計算の画面。1200×630)。
+// 前は飲食店の画面(FORECAST_IMAGE)が出ていた(PLAN §5)
+const CALLCENTER_IMAGE = '/og/callcenter.jpg'
 const forecastPages: SeoPage[] = [
   {
     path: '/forecast',
@@ -94,7 +98,7 @@ const forecastPages: SeoPage[] = [
     title: `物流・倉庫の出荷件数予測ツール(無料)| ${SELLER.brand}`,
     description: '日別の出荷件数・入荷件数を入れるだけで、この先1週間の件数と工程ごとの必要人数を予想する無料ツール。データはブラウザの外に送りません。',
   },
-].map((p) => ({ ...p, image: FORECAST_IMAGE }))
+].map((p) => ({ ...p, image: p.path === '/forecast/callcenter' ? CALLCENTER_IMAGE : FORECAST_IMAGE }))
 
 // 無料の計算ページ(予測ツールへの検索の入口。kikukawa-growth/PLAN.md §4.5)
 const toolPages: SeoPage[] = [
@@ -102,8 +106,17 @@ const toolPages: SeoPage[] = [
     path: '/tools/erlang-c',
     title: `コールセンターの必要人数計算(アーランC・無料)| ${SELLER.brand}`,
     description: '30分あたりの入電数・平均処理時間・応答率の目標(例: 20秒以内に80%)から、電話を受けるのに必要な人数とシフト人数をアーランCで計算する無料ツール。人数を1人増減したときの応答率と待ち時間も一覧で見られます。',
-    image: FORECAST_IMAGE,
+    image: CALLCENTER_IMAGE,
     jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: ERLANG_FAQ.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        })),
+      },
       {
         '@context': 'https://schema.org',
         '@type': 'WebApplication',

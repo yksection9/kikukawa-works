@@ -344,9 +344,16 @@ export function Forecast() {
                     <Link to={`/forecast/${ind}`} className="font-serif text-[22px] font-semibold hover:text-fc-accent">{COPY[ind].label}</Link>
                     <p className="mt-1 text-fc-sub">{ALL.pick[ind]}</p>
                   </div>
-                  <a href={DEMO_URL(ind)} className="shrink-0 font-bold text-fc-accent underline-offset-4 hover:underline">
-                    {COPY[ind].label}のテストデータで試す
-                  </a>
+                  <div className="flex shrink-0 flex-col gap-1 sm:items-end">
+                    <a href={DEMO_URL(ind)} className="font-bold text-fc-accent underline-offset-4 hover:underline">
+                      {COPY[ind].label}のテストデータで試す
+                    </a>
+                    {ind === 'callcenter' && (
+                      <Link to="/forecast/callcenter#apply" className="text-sm text-fc-sub underline-offset-4 hover:text-fc-ink hover:underline">
+                        無料の入電予測診断(法人向け)
+                      </Link>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>
@@ -393,10 +400,16 @@ export function Forecast() {
             <h2 className="font-serif text-[22px] font-semibold tracking-[0.02em] sm:text-[28px]">無料で予測してもらう</h2>
             <div className="mt-4 max-w-[38em] space-y-3 leading-[1.85] text-white/85">
               <p>
-                あなたのお店・センター・倉庫の記録で、1回無料で予測します(先着: 飲食店10店・コールセンター5社・物流5社)。
+                あなたのお店・倉庫の記録で、1回無料で予測します(先着: 飲食店10店・物流5社)。
                 データを送っていただく必要はありません。画面を一緒に見ながら、お手元のブラウザで進めます。
               </p>
               <p>メールに、業種と、手元にある記録のおおよその期間(例: 2024年4月から日別)を書いてお送りください。</p>
+              {/* コールセンターは「無料の入電予測診断」1本にまとめる(申込が2種類あって紛らわしかったため。PLAN §5) */}
+              <p>
+                コールセンター・BPOの方は、CSVを送るだけで報告書をお返しする
+                <Link to="/forecast/callcenter#apply" className="font-bold text-champagne underline underline-offset-4 hover:text-night-fg">無料の入電予測診断</Link>
+                へどうぞ(打ち合わせなし・先着5社)。
+              </p>
             </div>
             <a
               href={`mailto:${SELLER.email}?subject=${mailSubject}`}
